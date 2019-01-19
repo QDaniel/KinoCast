@@ -18,14 +18,26 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
+import java.security.KeyStore;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+
+import okhttp3.CipherSuite;
+import okhttp3.ConnectionSpec;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.TlsVersion;
 
 public class Utils {
     //public static final String USER_AGENT = "KinoCast v" + BuildConfig.VERSION_NAME;
@@ -49,11 +61,11 @@ public class Utils {
     }
 
     public static String getRedirectTarget(String url) {
-        OkHttpClient client = new OkHttpClient.Builder()
+        OkHttpClient client = enableTls12OnPreLollipop(new OkHttpClient.Builder()
                 .followRedirects(false)
                 .addNetworkInterceptor(new UserAgentInterceptor(USER_AGENT))
                 .cookieJar(Parser.injectedCookieJar)
-                .build();
+        ).build();
         Request request = new Request.Builder().url(url).build();
         try {
             Response response = client.newCall(request).execute();
@@ -121,12 +133,54 @@ public class Utils {
                 .timeout(6000);
     }
     public static OkHttpClient buildOkHttpClient() {
-        return new OkHttpClient.Builder()
+        return enableTls12OnPreLollipop(new OkHttpClient.Builder()
                 .addNetworkInterceptor(new UserAgentInterceptor(USER_AGENT))
                 .cookieJar(Parser.injectedCookieJar)
-                .build();
+        ).build();
     }
 
+    public static OkHttpClient.Builder enableTls12OnPreLollipop(OkHttpClient.Builder client) {
+        if (Build.VERSION.SDK_INT >= 16 && Build.VERSION.SDK_INT < 22) {
+            try {
+
+                ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.COMPATIBLE_TLS)
+                        .tlsVersions(TlsVersion.TLS_1_2, TlsVersion.TLS_1_1, TlsVersion.TLS_1_0)
+                        .cipherSuites(
+                                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                                CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+                                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+                                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA)
+                        .build();
+                List<ConnectionSpec> specs = new ArrayList<>();
+                specs.add(spec);
+                specs.add(ConnectionSpec.CLEARTEXT);
+                client.connectionSpecs(specs);
+
+               /* SSLContext sc = SSLContext.getInstance("TLSv1.2");
+                sc.init(null, null, null);
+
+                    TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                    tmf.init((KeyStore) null);
+                    TrustManager[] trustManagers = tmf.getTrustManagers();
+                X509TrustManager origTrustmanager = (X509TrustManager) trustManagers[0];
+
+                client.sslSocketFactory(new Tls12SocketFactory(sc.getSocketFactory()), origTrustmanager);
+
+                ConnectionSpec cs = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                        .tlsVersions(TlsVersion.TLS_1_2)
+                        .build();
+
+                List<ConnectionSpec> specs = new ArrayList<>();
+                specs.add(cs);
+
+                client.connectionSpecs(specs);*/
+            } catch (Exception exc) {
+                Log.e("OkHttpTLSCompat", "Error while setting TLS 1.2", exc);
+            }
+        }
+
+        return client;
+    }
     @SuppressWarnings("deprecation")
     public static boolean isWifiConnected(Context context) {
         ConnectivityManager connManager = (ConnectivityManager) context

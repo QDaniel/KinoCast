@@ -7,7 +7,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.widget.Toast;
 
 import com.ov3rk1ll.kinocast.CastApp;
@@ -29,6 +28,7 @@ import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +37,8 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import static com.ov3rk1ll.kinocast.utils.Utils.enableTls12OnPreLollipop;
 
 public abstract class Parser {
     private static final String TAG = Parser.class.getSimpleName();
@@ -55,6 +57,8 @@ public abstract class Parser {
             TVStreamsParser.class
     };
 
+    private static List<Parser> instances = new ArrayList<>();
+
     private static Parser instance;
     public static void setInstance(Parser parser) {
         instance = parser;
@@ -72,6 +76,18 @@ public abstract class Parser {
             Log.i("selectParser", "ID is " + Parser.getInstance().getParserId());
         }
         return instance;
+    }
+
+    public static Parser getParser(Context context, int id) {
+        if (instance != null && instance.getParserId() == id) return instance;
+        for (Parser p : instances) {
+            if (p != null && p.getParserId() == id) return p;
+        }
+
+        Parser lp = selectByParserId(context, id);
+        lp.initHttpClient(context);
+        instances.add(lp);
+        return lp;
     }
 
     public static void selectParser(Context context, int id) {
@@ -129,15 +145,15 @@ public abstract class Parser {
         for (Cookie co: colist) {
             injectedCookieJar.addCookie(co);
         }
-
-        client = new OkHttpClient.Builder()
+        OkHttpClient.Builder okclient = new OkHttpClient.Builder()
                 .followRedirects(false)
                 .followSslRedirects(false)
                 .addNetworkInterceptor(new UserAgentInterceptor(Utils.USER_AGENT))
                 .addInterceptor(new CloudflareDdosInterceptor(context))
                 .cookieJar(injectedCookieJar)
-                .dns(new CustomDns())
-                .build();
+                .dns(new CustomDns());
+        client = enableTls12OnPreLollipop(okclient).build();
+
     }
 
     public static Document getDocument(String url) throws IOException {
@@ -188,7 +204,7 @@ public abstract class Parser {
         return null;
         */
 
-        OkHttpClient noFollowClient = client.newBuilder().followRedirects(false).build();
+        OkHttpClient noFollowClient = enableTls12OnPreLollipop(client.newBuilder().followRedirects(false)).build();
         Request request = new Request.Builder().url(url).build();
         Log.i(TAG, "read text from " + url + ", cookies=" + noFollowClient.cookieJar().toString());
         try {
@@ -284,7 +300,9 @@ public abstract class Parser {
 
 
     public void updateFromCache(TheMovieDb moviedb, ViewModel model){
-        JSONObject data = moviedb.get(Parser.getInstance().getImdbLink(model), false);
+
+        if(model == null) return;
+        JSONObject data = moviedb.get(model.getParser(CastApp.getContext()).getImdbLink(model), false);
         if(data == null) return;
 
         if(model.getRating()==0) {

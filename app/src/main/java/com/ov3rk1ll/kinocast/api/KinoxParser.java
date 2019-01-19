@@ -80,6 +80,7 @@ public class KinoxParser extends Parser{
             element = element.parent();
             try {
                 ViewModel model = new ViewModel();
+                model.setParserId(PARSER_ID);
                 String url = element.select("h1").parents().attr("href");
                 model.setSlug(url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf(".")));
                 model.setTitle(element.select("h1").text());
@@ -189,6 +190,7 @@ public class KinoxParser extends Parser{
     @Override
     public ViewModel loadDetail(String url) {
         ViewModel model = new ViewModel();
+        model.setParserId(PARSER_ID);
         try {
             Map<String, String> cookies = new HashMap<>();
             cookies.put("StreamHostMirrorMode", "fixed");

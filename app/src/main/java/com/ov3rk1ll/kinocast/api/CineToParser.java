@@ -118,6 +118,7 @@ public class CineToParser extends Parser {
                     String imdb = item.getString("imdb");
                     for (String ln : lang.split(",")) {
                         ViewModel model = new ViewModel();
+                        model.setParserId(PARSER_ID);
                         model.setSlug(imdb);
                         model.setTitle(item.getString("title"));
                         model.setImdbId("tt" + imdb);
@@ -228,6 +229,7 @@ public class CineToParser extends Parser {
 
         String[] parts = url.split("/");
         ViewModel model = new ViewModel();
+        model.setParserId(PARSER_ID);
         model.setSlug(parts[0]);
         model.setImdbId("tt" + parts[0]);
         model.setLanguageResId(Integer.parseInt(parts[1]));

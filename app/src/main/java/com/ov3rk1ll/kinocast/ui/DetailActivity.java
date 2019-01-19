@@ -86,6 +86,7 @@ import java.util.Map;
 public class DetailActivity extends AppCompatActivity implements ActionMenuView.OnMenuItemClickListener {
     public static final String ARG_ITEM = "param_item";
     private ViewModel item;
+    private Parser parser;
     private RelativeLayout  mAdView;
 
     private CastContext mCastContext;
@@ -194,6 +195,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             finish();
             return;
         }
+        parser = item.getParser(this);
 
         initToolbar();
         initInstances();
@@ -364,7 +366,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
         //Update Bookmark to keep series info
         if (item.getType() == ViewModel.Type.SERIES) {
-            BookmarkManager.Bookmark b = new BookmarkManager.Bookmark(Parser.getInstance().getParserId(), Parser.getInstance().getPageLink(item));
+            BookmarkManager.Bookmark b = new BookmarkManager.Bookmark(parser.getParserId(), parser.getPageLink(item));
             b.setSeason(((Spinner) findViewById(R.id.spinnerSeason)).getSelectedItemPosition());
             b.setEpisode(((Spinner) findViewById(R.id.spinnerEpisode)).getSelectedItemPosition());
             int idx = bookmarkManager.indexOf(b);
@@ -409,7 +411,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             //NavUtils.navigateUpFromSameTask(this);
             return true;
         } else if (id == R.id.action_share) {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Parser.getInstance().getPageLink(this.item)));
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(parser.getPageLink(this.item)));
             startActivity(intent);
             return true;
         } else if (id == R.id.action_imdb) {
@@ -419,8 +421,8 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         } else if (id == R.id.action_bookmark_on) {
             //Remove bookmark
             bookmarkManager.remove(new BookmarkManager.Bookmark(
-                            Parser.getInstance().getParserId(),
-                            Parser.getInstance().getPageLink(this.item))
+                    parser.getParserId(),
+                    parser.getPageLink(this.item))
             );
             //Show confirmation
             Toast.makeText(getApplication(), getString(R.string.detail_bookmark_on_confirm), Toast.LENGTH_SHORT).show();
@@ -429,8 +431,8 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         } else if (id == R.id.action_bookmark_off) {
             //Add bookmark
             bookmarkManager.addAsPublic(new BookmarkManager.Bookmark(
-                            Parser.getInstance().getParserId(),
-                            Parser.getInstance().getPageLink(this.item))
+                    parser.getParserId(),
+                    parser.getPageLink(this.item))
             );
             //Show confirmation
             Toast.makeText(getApplication(), getString(R.string.detail_bookmark_off_confirm), Toast.LENGTH_SHORT).show();
@@ -483,14 +485,14 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
         @Override
         protected Boolean doInBackground() throws Exception {
-            item = Parser.getInstance().loadDetail(item);
+            item = parser.loadDetail(item);
             if(item!=null) {
                 Map<String, String> articleParams = new HashMap<>();
-                articleParams.put("parser", Parser.getInstance().getParserName());
+                articleParams.put("parser", parser.getParserName());
                 articleParams.put("video_name", item.getTitle());
                 articleParams.put("video_type", item.getType() == ViewModel.Type.MOVIE ? "Movie" : "Series");
                 articleParams.put("video_imdb", item.getImdbId());
-                articleParams.put("video_url", Parser.getInstance().getPageLink(item));
+                articleParams.put("video_url", parser.getPageLink(item));
                 FlurryAgent.logEvent("Movie_Detail", articleParams);
             }
 
@@ -503,7 +505,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                 d.setName("Download");
                 d.setUrl(file.getAbsoluteFile().getPath());
                 hosts.add(0, d);
-                item.setMirrors((Host[]) hosts.toArray(new Host[0]));
+                item.setMirrors(hosts.toArray(new Host[0]));
             }
             return true;
         }
@@ -560,7 +562,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         @Override
         protected List<Host> doInBackground() throws Exception {
             if (item.getType() == ViewModel.Type.SERIES) {
-                List<Host>  list = Parser.getInstance().getHosterList(item, s.id, s.episodes[position]);
+                List<Host>  list = parser.getHosterList(item, s.id, s.episodes[position]);
                 return list;
             }
             return null;
@@ -635,9 +637,9 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                     if (item.getType() == ViewModel.Type.SERIES) {
                         Season s = item.getSeasons()[spinnerSeasonItemPosition];
                         String e = s.episodes[spinnerEpisodeItemPosition];
-                        link = Parser.getInstance().getMirrorLink(this, item, host, s.id, e);
+                        link = parser.getMirrorLink(this, item, host, s.id, e);
                     } else {
-                        link = Parser.getInstance().getMirrorLink(this, item, host);
+                        link = parser.getMirrorLink(this, item, host);
                     }
                     if(link.contains("streamcrypt.net/")) link = Utils.getMultiRedirectTarget(link);
                     host.setUrl(link);
@@ -716,11 +718,11 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                         AppAdapter.App app = adapter.getItem(position);
 
                         Map<String, String> articleParams = new HashMap<>();
-                        articleParams.put("parser", Parser.getInstance().getParserName());
+                        articleParams.put("parser", parser.getParserName());
                         articleParams.put("video_name", item.getTitle());
                         articleParams.put("video_type", item.getType() == ViewModel.Type.MOVIE ? "Movie" : "Series");
                         articleParams.put("video_imdb", item.getImdbId());
-                        articleParams.put("video_url", Parser.getInstance().getPageLink(item));
+                        articleParams.put("video_url", parser.getPageLink(item));
                         articleParams.put("host_name", host.getName());
                         articleParams.put("host_url", host.getUrl());
                         articleParams.put("host_videourl", host.getVideoUrl());
@@ -821,7 +823,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
     private String getCachedImage(int size, String type){
         TheMovieDb tmdbCache = new TheMovieDb(CastApp.GetCheckedContext(getApplication()));
-        String cacheUrl = Parser.getInstance().getImdbLink(item);
+        String cacheUrl = parser.getImdbLink(item);
         JSONObject json = tmdbCache.get(cacheUrl, false);
         if(json != null){
             try {

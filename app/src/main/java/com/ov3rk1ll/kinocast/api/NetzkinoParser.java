@@ -73,6 +73,7 @@ public class NetzkinoParser extends Parser {
                 try {
                     JSONObject cf = item.getJSONObject("custom_fields");
                     ViewModel model = new ViewModel();
+                    model.setParserId(PARSER_ID);
                     model.setSummary(Jsoup.parse(item.getString("content")).text());
                     model.setSlug(item.getString("slug"));
                     model.setTitle(item.getString("title"));
@@ -134,11 +135,22 @@ public class NetzkinoParser extends Parser {
     @Override
     public ViewModel loadDetail(String url) {
         url = parseSlug(url);
-        if(url == null || lastModels == null) return null;
+        if(url == null) return null;
 
         for ( ViewModel m: lastModels) {
             if(url.equalsIgnoreCase(m.getSlug())) return m;
         }
+        try {
+            List<ViewModel> list = parseList(getSearchPage(url.replace("-", " ").replace("_", " ")));
+            AddModels(list);
+
+            for ( ViewModel m: lastModels) {
+                if(url.equalsIgnoreCase(m.getSlug())) return m;
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
         return null;
     }
 

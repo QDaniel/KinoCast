@@ -1,5 +1,8 @@
 package com.ov3rk1ll.kinocast.data;
 
+import android.content.Context;
+
+import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.api.mirror.Host;
 
 import java.io.Serializable;
@@ -19,9 +22,11 @@ public class ViewModel implements Serializable {
     private String year;
 
     private Type type;
+    private int parserId;
 
     private transient Season[] seasons;
     private transient Host[] mirrors;
+    private transient Parser parser;
 
     public ViewModel() {
 
@@ -121,6 +126,21 @@ public class ViewModel implements Serializable {
 
     public void setImdbId(String imdbId) {
         this.imdbId = imdbId;
+    }
+
+    public int getParserId() {
+        return parserId;
+    }
+
+    public void setParserId(int parserId) {
+        this.parserId = parserId;
+    }
+
+    public Parser getParser(Context context){
+        if(parser == null || parser.getParserId()!= parserId) {
+            parser = Parser.getParser(context, parserId);
+        }
+        return parser;
     }
 
     public enum Type{

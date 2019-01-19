@@ -91,6 +91,7 @@ public class DeeplinkParser extends Parser {
         if(host != null) {
 
             ViewModel viewModel = new ViewModel();
+            viewModel.setParserId(PARSER_ID);
             viewModel.setSlug(url);
             viewModel.setType(ViewModel.Type.MOVIE);
             viewModel.setTitle(url);

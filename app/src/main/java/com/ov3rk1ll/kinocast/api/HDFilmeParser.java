@@ -99,6 +99,7 @@ public class HDFilmeParser extends Parser {
             element = element.parent();
             try {
                 ViewModel model = new ViewModel();
+                model.setParserId(PARSER_ID);
                 model.setType(ViewModel.Type.MOVIE);
                 Element urltitle =  element.select("div.decaption h3.title-product a").first();
                 String url = urltitle.attr("href");
@@ -170,6 +171,7 @@ public class HDFilmeParser extends Parser {
     @Override
     public ViewModel loadDetail(String url) {
         ViewModel model = new ViewModel();
+        model.setParserId(PARSER_ID);
         try {
             Document doc = getDocument(url, null);
             model.setSlug(url.substring(url.lastIndexOf("/") + 1));

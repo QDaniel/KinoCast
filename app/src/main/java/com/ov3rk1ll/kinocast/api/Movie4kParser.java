@@ -69,6 +69,7 @@ public class Movie4kParser extends Parser{
         Elements files = doc.select("div#maincontentnew");
         for(Element file : files){
             ViewModel model = new ViewModel();
+            model.setParserId(PARSER_ID);
 
             Elements divs = file.select("div");
             Element data = divs.get(3);

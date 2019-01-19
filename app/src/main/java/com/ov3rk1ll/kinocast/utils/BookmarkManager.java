@@ -2,8 +2,10 @@ package com.ov3rk1ll.kinocast.utils;
 
 import android.content.Context;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.text.TextUtils;
 
+import com.ov3rk1ll.kinocast.CastApp;
 import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 
@@ -35,15 +37,15 @@ public class BookmarkManager extends ArrayList<BookmarkManager.Bookmark> {
     private void save(){
         try {
             //File f = new File(context.getFilesDir(), FILENAME);
+            File docdir = Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOCUMENTS);
+            if(!docdir.exists()) docdir.mkdir();
 
-            File f = new File(Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_DOCUMENTS), FILENAME);
+            File f = new File(docdir, FILENAME);
 
             if(f.exists()) f.delete();
             //FileOutputStream fos = context.openFileOutput(FILENAME, Context.MODE_PRIVATE);
-            FileOutputStream fos = new FileOutputStream(
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) +"/"+ FILENAME, false);
-
+            FileOutputStream fos = new FileOutputStream(f.getAbsolutePath(), false);
 
             ObjectOutputStream os = new ObjectOutputStream(fos);
             os.writeObject(this);
@@ -74,7 +76,7 @@ public class BookmarkManager extends ArrayList<BookmarkManager.Bookmark> {
                 super.add(simpleClass.get(i));
             }
         } catch (Exception ignored) {
-
+            ignored.printStackTrace();
         }
     }
 
@@ -110,7 +112,7 @@ public class BookmarkManager extends ArrayList<BookmarkManager.Bookmark> {
     }
 
     public Bookmark findItem(ViewModel item){
-        Bookmark b = new BookmarkManager.Bookmark(Parser.getInstance().getParserId(), Parser.getInstance().getPageLink(item));
+        Bookmark b = new BookmarkManager.Bookmark(item.getParserId(), item.getParser(CastApp.GetCheckedContext(context)).getPageLink(item));
         int idx = indexOf(b);
         if(idx == -1){
             return null;

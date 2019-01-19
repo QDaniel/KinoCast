@@ -180,7 +180,7 @@ public class ListFragment extends Fragment {
 
             if(viewModels != null){
                 for(ViewModel m: viewModels){
-                    Parser.getInstance().updateFromCache(tmdbCache, m);
+                    m.getParser(CastApp.GetCheckedContext(getActivity())).updateFromCache(tmdbCache, m);
                     adapter.add(m, adapter.getItemCount());
                 }
             }else{
@@ -215,9 +215,11 @@ public class ListFragment extends Fragment {
             List<ViewModel> list = new ArrayList<>();
             for(int i = 0; i < bookmarks.get().size(); i++){
                 BookmarkManager.Bookmark b = bookmarks.get().get(i);
+
                 if(!b.isInternal()) {
-                    Parser p = Parser.selectByParserId(getActivity(), b.getParserId());
-                    list.add(p.loadDetail(b.getUrl()));
+                    Parser p = Parser.getParser(CastApp.GetCheckedContext(getParams()[0]), b.getParserId());
+                    ViewModel model = p.loadDetail(b.getUrl());
+                    if(model != null) list.add(model);
                 }
             }
             return list.toArray(new ViewModel[list.size()]);

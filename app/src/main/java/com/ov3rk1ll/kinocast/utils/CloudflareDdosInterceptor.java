@@ -33,6 +33,7 @@ public class CloudflareDdosInterceptor implements Interceptor {
     @Override
     public Response intercept(final Chain chain) throws IOException {
         final Request request = chain.request();
+
         final Response response = chain.proceed(request);
         if(response.code() == 503) {
             Log.d(TAG, "intercept: Status " + response.code() + " for " + request.url());

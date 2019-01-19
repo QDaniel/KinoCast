@@ -94,6 +94,7 @@ public class TVStreamsParser extends Parser {
             M3UPlaylist mlist = m3up.parseFile(doc);
             for (M3UItem item : mlist.getPlaylistItems()) {
                 ViewModel model = new ViewModel();
+                model.setParserId(PARSER_ID);
                 model.setSlug(item.getItemUrl());
                 model.setTitle(item.getItemName());
                 model.setType(ViewModel.Type.MOVIE);

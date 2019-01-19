@@ -4,6 +4,7 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.util.ContentLengthInputStream;
+import com.ov3rk1ll.kinocast.CastApp;
 import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.utils.TheMovieDb;
 
@@ -40,7 +41,8 @@ public class OkHttpViewModelStreamFetcher implements DataFetcher<InputStream> {
     public InputStream loadData(Priority priority) throws Exception {
         GlideUrl url;
         //String cacheUrl = Parser.getInstance().getPageLink(model.getViewModel()) + "?size=" + model.getScreenWidthPx() + "&type=" + model.getType();
-        String cacheUrl = Parser.getInstance().getImdbLink(model.getViewModel());
+        Parser p = model.getViewModel().getParser(CastApp.getContext());
+        String cacheUrl = p.getImdbLink(model.getViewModel());
 
         String imageUrl = model.getViewModel().getImage();
         if(imageUrl == null || "".equalsIgnoreCase(imageUrl)){
@@ -57,7 +59,7 @@ public class OkHttpViewModelStreamFetcher implements DataFetcher<InputStream> {
                         imageUrl = TheMovieDb.IMAGE_BASE_PATH + getPosterSize(size) + json.getString(key);
                 }
                 model.getViewModel().setImage(imageUrl);
-                Parser.getInstance().updateFromCache(tmdbCache, model.getViewModel());
+                p.updateFromCache(tmdbCache, model.getViewModel());
             } catch(Exception e) {
                 e.printStackTrace();
             }

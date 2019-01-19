@@ -7,6 +7,9 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.security.ProviderInstaller;
 import com.ov3rk1ll.kinocast.api.KinoxParser;
 import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.ui.util.glide.OkHttpViewModelUrlLoader;
@@ -46,6 +49,14 @@ public class CastApp extends Application {
         //com.google.android.gms.ads.MobileAds.initialize(this, "ca-app-pub-2728479259954125~72137");
         Glide.get(getApplicationContext())
                 .register(ViewModelGlideRequest.class, InputStream.class, new OkHttpViewModelUrlLoader.Factory());
+
+        try {
+            ProviderInstaller.installIfNeeded(getApplicationContext());
+        } catch (GooglePlayServicesRepairableException e) {
+            e.printStackTrace();
+        } catch (GooglePlayServicesNotAvailableException e) {
+            e.printStackTrace();
+        }
 
         super.onCreate();
     }
