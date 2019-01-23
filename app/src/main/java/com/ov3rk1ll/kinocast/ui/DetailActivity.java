@@ -539,6 +539,9 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                 findViewById(R.id.layoutSeries).setVisibility(View.VISIBLE);
             } else {
                 findViewById(R.id.layoutSeries).setVisibility(View.GONE);
+                if(item.getMirrors() == null)
+                    (new QueryHosterTask()).execute((Void) null);
+
                 setMirrorSpinner(item.getMirrors());
             }
 
@@ -555,17 +558,21 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         protected void onPreExecute() {
             super.onPreExecute();
             findViewById(R.id.layoutMirror).setVisibility(View.GONE);
-            s = item.getSeasons()[((Spinner) findViewById(R.id.spinnerSeason)).getSelectedItemPosition()];
-            position = ((Spinner) findViewById(R.id.spinnerEpisode)).getSelectedItemPosition();
+            if (item.getType() == ViewModel.Type.SERIES) {
+                s = item.getSeasons()[((Spinner) findViewById(R.id.spinnerSeason)).getSelectedItemPosition()];
+                position = ((Spinner) findViewById(R.id.spinnerEpisode)).getSelectedItemPosition();
+            }
         }
 
         @Override
         protected List<Host> doInBackground() throws Exception {
+            List<Host> list;
             if (item.getType() == ViewModel.Type.SERIES) {
-                List<Host>  list = parser.getHosterList(item, s.id, s.episodes[position]);
-                return list;
+                list = parser.getHosterList(item, s.id, s.episodes[position]);
+            } else {
+                list = parser.getHosterList(item, 0, "");
             }
-            return null;
+            return list;
         }
 
         @Override

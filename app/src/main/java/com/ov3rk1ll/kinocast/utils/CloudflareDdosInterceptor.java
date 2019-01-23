@@ -14,6 +14,10 @@ import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.ui.MainActivity;
 
 import java.io.IOException;
+import java.net.HttpCookie;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cookie;
 import okhttp3.Interceptor;
@@ -40,77 +44,40 @@ public class CloudflareDdosInterceptor implements Interceptor {
             Log.d(TAG, "intercept: Cookie: " + response.header("Set-Cookie"));
             Log.v(TAG, "intercept: try to handle request to " + request.url().toString());
             String body = response.body().string();
-            final boolean[] requestDone = {false};
-            final String[] solvedUrl = {null};
+
             if (body.contains("DDoS protection by Cloudflare") && !request.url().toString().contains("/cdn-cgi/l/chk_jschl")) {
-                MainActivity.activity.runOnUiThread(new Runnable() {
-                    @SuppressLint("SetJavaScriptEnabled")
+                final CountDownLatch latch = new CountDownLatch (1);
+                Cloudflare cf = new Cloudflare(request.url().toString());
+                cf.setUser_agent(Utils.USER_AGENT);
+                cf.getCookies(new Cloudflare.cfCallback() {
                     @Override
-                    public void run() {
-                        // Virtual WebView
-                        final WebView webView = MainActivity.webView;
+                    public void onSuccess(List<HttpCookie> cookieList) {
+                        Log.v(TAG, "Success: Cloudflare.getCookies : " + Cloudflare.listToString(cookieList));
+                        InjectedCookieJar jar = (InjectedCookieJar) Parser.getInstance().getClient().cookieJar();
 
-                        // Delete all cookies
-                        CookieSyncManager cookieSyncMngr = CookieSyncManager.createInstance(context);
-                        cookieSyncMngr.startSync();
-                        CookieManager cookieManager = CookieManager.getInstance();
-                        cookieManager.removeAllCookie();
-                        cookieManager.removeSessionCookie();
-                        cookieSyncMngr.stopSync();
-                        cookieSyncMngr.sync();
-                        cookieManager.setCookie(request.url().toString(), response.header("Set-Cookie"));
-                        cookieSyncMngr.sync();
+                        for (HttpCookie cookie : cookieList) {
+                            jar.addCookie(cookie);
+                        }
+                        latch.countDown();
+                    }
 
-                        webView.setVisibility(View.GONE);
-                        webView.clearCache(true);
-                        webView.getSettings().setUserAgentString(Utils.USER_AGENT);
-                        webView.getSettings().setJavaScriptEnabled(true);
-                        webView.setWebViewClient(new WebViewClient() {
-                            @Override
-                            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                                String raw = CookieManager.getInstance().getCookie(url);
-                                Log.v("CloudflareDdos", "shouldOverrideUrlLoading: wants to load " + url + " with cookies " + raw);
-                                solvedUrl[0] = url;
-                                requestDone[0] = true;
-                                return true;
-                            }
-                        });
-                        webView.loadUrl(request.url().toString());
-                        Log.v("CloudflareDdos", "load " + request.url().toString() + " in webview");
-
+                    @Override
+                    public void onFail() {
+                        Log.e(TAG, "Fail: Cloudflare.getCookies for " + request.url());
+                        latch.countDown();
                     }
                 });
 
-                int timeout = 50;
-                // Wait for the webView to load the correct url
-                while (!requestDone[0]){
-                    SystemClock.sleep(200);
-                    timeout--;
-                    if(timeout <= 0)
-                        break;
+                try {
+                    latch.await(10L, TimeUnit.MINUTES);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-                if(solvedUrl[0] != null) {
-                    // Store the cookies from the WebView in the OkHttpClient's jar
-                    InjectedCookieJar jar = (InjectedCookieJar) Parser.getInstance().getClient().cookieJar();
-                    String raw = CookieManager.getInstance().getCookie(solvedUrl[0]);
-                    Log.v("CloudflareDdos", "load " + solvedUrl[0] + ", raw-cookies=" + raw);
-                    String[] cookies = raw.split(";");
-                    for (String c : cookies) {
-                        c = c + "; domain=" + request.url().host();
-                        if(request.url().isHttps()) c = c.trim() + "; secure";
 
-                        Cookie co = Cookie.parse(request.url(), c.trim());
-                        jar.addCookie(co);
-                    }
-
-                    // call the check url to get and store the correct cookies
-                    Parser.getInstance().getBody(solvedUrl[0]);
-
-                    // run the action request again
-                    Log.v(TAG, "intercept: will retry request to " + request.url());
-                    return chain.proceed(request);
-                }
-                return response;
+                Request.Builder build = request.newBuilder();
+                // run the action request again
+                Log.v(TAG, "intercept: will retry request to " + request.url());
+                return chain.proceed(build.build());
             }
         }
         return response;

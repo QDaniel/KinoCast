@@ -9,7 +9,7 @@ repositories {
 
 def versionMajor = 1
 def versionMinor = 9
-def versionPatch = 0
+def versionPatch = 1
 def versionBuild = 99 // bump for dogfood builds, public betas, etc.
 ext {
     calculateVersionName = {
@@ -123,4 +123,6 @@ dependencies {
     implementation 'dnsjava:dnsjava:2.1.8'
     implementation 'com.github.bumptech.glide:okhttp3-integration:1.4.0@aar'
     implementation 'com.github.bumptech.glide:glide:3.7.0'
+    implementation 'com.eclipsesource.j2v8:j2v8_android:3.0.5@aar'
+
 }

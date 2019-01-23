@@ -31,15 +31,19 @@ public class CustomDns implements Dns {
         if (mInitialized) return; else mInitialized = true;
 
         try {
+
+
+
             // configure the resolvers, starting with the default ones (based on the current network connection)
             Resolver defaultResolver = Lookup.getDefaultResolver();
+            Resolver cfFirstResolver = new SimpleResolver("1.1.1.1");
             // use Google's public DNS services
             Resolver googleFirstResolver = new SimpleResolver("8.8.8.8");
             Resolver googleSecondResolver = new SimpleResolver("8.8.4.4");
             // also try using Amazon
             Resolver amazonResolver = new SimpleResolver("205.251.198.30");
             Lookup.setDefaultResolver(new ExtendedResolver(new Resolver[]{
-                    googleFirstResolver, googleSecondResolver, amazonResolver, defaultResolver }));
+                    cfFirstResolver, googleFirstResolver, googleSecondResolver, amazonResolver, defaultResolver }));
         } catch (UnknownHostException e) {
             Log.w(TAG, "Couldn't initialize custom resolvers");
         }

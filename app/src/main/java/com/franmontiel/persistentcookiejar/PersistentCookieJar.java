@@ -16,6 +16,8 @@
 
 package com.franmontiel.persistentcookiejar;
 
+import android.util.Log;
+
 import com.franmontiel.persistentcookiejar.cache.CookieCache;
 import com.franmontiel.persistentcookiejar.persistence.CookiePersistor;
 
@@ -57,6 +59,7 @@ public class PersistentCookieJar implements ClearableCookieJar {
 
     @Override
     synchronized public List<Cookie> loadForRequest(HttpUrl url) {
+        Log.v("PCJ", "loadForRequest " + url.toString());
         List<Cookie> cookiesToRemove = new ArrayList<>();
         List<Cookie> validCookies = new ArrayList<>();
 
@@ -69,6 +72,8 @@ public class PersistentCookieJar implements ClearableCookieJar {
 
             } else if (currentCookie.matches(url)) {
                 validCookies.add(currentCookie);
+                Log.v("PCJ", " - Cookie: " + currentCookie.toString());
+
             }
         }
 

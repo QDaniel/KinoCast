@@ -1,6 +1,7 @@
 package com.ov3rk1ll.kinocast.utils;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.data.ViewModel;
@@ -171,5 +172,19 @@ public class TheMovieDb {
                 url = url.substring(0, url.indexOf("#"));
             return url.replaceAll("[.:/,%?&=]", "+").replaceAll("[+]+", "+");
         }
+    }
+
+    public static String getImdbId(String url){
+        if(!TextUtils.isEmpty(url)){
+            //http://www.imdb.com/title/tt2709692/
+            int i = url.indexOf("/tt");
+            if(i > 0) {
+                int l = url.indexOf("/",i+1);
+                String imdbid = (l>i ) ? url.substring(i+1, l) : url.substring(i+1);
+                return imdbid;
+
+            }
+        }
+        return "";
     }
 }

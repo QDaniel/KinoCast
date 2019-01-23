@@ -3,6 +3,7 @@ package com.ov3rk1ll.kinocast.api.mirror;
 import android.net.Uri;
 
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
+import com.ov3rk1ll.kinocast.utils.Utils;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -12,6 +13,7 @@ public abstract class Host implements Serializable {
     protected String url;
     protected String urlVideo;
     protected String slug;
+    protected String comment;
 
     public static Class<?>[] HOSTER_LIST = {
             DivxStage.class,
@@ -113,6 +115,14 @@ public abstract class Host implements Serializable {
         this.urlVideo = url;
     }
 
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
     public String getSlug() {
         return slug;
     }
@@ -127,7 +137,9 @@ public abstract class Host implements Serializable {
 
     @Override
     public String toString() {
-        return getName() + " #" + mirror;
+        String text = getName() + " #" + mirror;
+        if(!Utils.isStringEmpty(comment)) text = text + " (" + comment + ")";
+        return text;
     }
 
     public Boolean canHandleUri(Uri uri) {

@@ -101,7 +101,7 @@ public class HDFilmeParser extends Parser {
                 ViewModel model = new ViewModel();
                 model.setParserId(PARSER_ID);
                 model.setType(ViewModel.Type.MOVIE);
-                Element urltitle =  element.select("div.decaption h3.title-product a").first();
+                Element urltitle =  element.select(".decaption > .title-product > a").first();
                 String url = urltitle.attr("href");
                model.setSlug(url.substring(url.lastIndexOf("/") + 1));
                 model.setTitle(urltitle.textNodes().get(0).text());
@@ -128,9 +128,9 @@ public class HDFilmeParser extends Parser {
         Element element = doc.select("#play-area-wrapper").first();
         try {
 
-            model.setTitle(element.select("b.title-film").first().text().trim());
+            model.setTitle(element.select(".title-film").first().text().trim());
             model.setImage(element.select("div.img-thumb img").first().attr("src"));
-            model.setSummary(element.select("div.caption > div.caption-scroll").text().trim());
+            model.setSummary(element.select(".caption > .caption-scroll").text().trim());
             model.setType(ViewModel.Type.MOVIE);
             model.setLanguageResId(R.drawable.lang_de);
             //model.setGenre(doc.select("li[Title=Genre]").text());
