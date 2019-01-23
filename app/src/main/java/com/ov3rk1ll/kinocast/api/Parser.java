@@ -54,6 +54,7 @@ public abstract class Parser {
             CineToParser.class,
             HDFilmeParser.class,
             NetzkinoParser.class,
+            StreamworldParser.class,
             TVStreamsParser.class
     };
 

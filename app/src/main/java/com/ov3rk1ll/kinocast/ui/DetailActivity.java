@@ -457,7 +457,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             findViewById(R.id.spinnerMirror).setEnabled(false);
             findViewById(R.id.buttonPlay).setEnabled(false);
         }
-        findViewById(R.id.layoutMirror).setVisibility(View.VISIBLE);
+        findViewById(R.id.layoutMirror).setVisibility(mirrors == null ? View.GONE : View.VISIBLE);
     }
 
     @Override

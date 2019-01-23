@@ -356,7 +356,7 @@ public class CineToParser extends Parser {
             // Pattern pattern = Pattern.compile("\\s+", Pattern.CASE_INSENSITIVE);
             Matcher matcher = pattern.matcher(solvedUrl[0]);
             matcher.find();
-            Recaptcha rc = new Recaptcha(url, matcher.group(1), "");
+            Recaptcha rc = new Recaptcha(url, matcher.group(1), "", false);
             queryTask.getDialog().dismiss();
 
             final AtomicBoolean done = new AtomicBoolean(false);

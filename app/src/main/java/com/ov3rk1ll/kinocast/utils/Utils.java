@@ -77,6 +77,30 @@ public class Utils {
         return null;
     }
 
+    public static String getRedirectTarget(String url, Set<Map.Entry<String, String>> postData) {
+        OkHttpClient client = enableTls12OnPreLollipop(new OkHttpClient.Builder()
+                .followRedirects(false)
+                .addNetworkInterceptor(new UserAgentInterceptor(USER_AGENT))
+                .cookieJar(Parser.injectedCookieJar)
+        ).build();
+
+        MultipartBody.Builder bodyBuilder = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM);
+        for (Map.Entry<String, String> pair : postData) {
+            bodyBuilder.addFormDataPart(pair.getKey(), pair.getValue());
+        }
+        RequestBody requestBody = bodyBuilder.build();
+        Request request = new Request.Builder().url(url).post(requestBody).build();
+        try {
+            Response response = client.newCall(request).execute();
+            String ret = response.header("Location");
+            return ret;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static String getMultiRedirectTarget(String url) {
         String lastRet = url;
         String lastUrl;

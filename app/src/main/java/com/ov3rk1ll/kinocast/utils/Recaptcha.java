@@ -22,8 +22,11 @@ public class Recaptcha {
     private static final String FALLBACK_FILTER = "g-recaptcha-response=";
 
     private final String baseUrl, publicKey, sToken;
+    private final Boolean useButton;
 
-    private static final String getRecahtchaHtml(String publicKey, String sToken) {
+    private static final String getRecaptchaHtml(String publicKey, String sToken, boolean useButton) {
+        String elm = useButton ? "button": "div";
+        String elm_txt = useButton ? "Weiter": "";
         return
                 "<script type=\"text/javascript\">" +
                         "window.globalOnCaptchaEntered = function(res) { " +
@@ -32,9 +35,9 @@ public class Recaptcha {
                         "</script>" +
                         "<script src=\"https://www.google.com/recaptcha/api.js\" async defer></script>" +
                         "<form action=\"" + FALLBACK_INTERCEPT + "\" method=\"GET\" id=\"_overchan_submitform\">" +
-                        "<div class=\"g-recaptcha\" data-sitekey=\"" + publicKey + "\" " +
+                        "<" + elm + " class=\"g-recaptcha\" data-sitekey=\"" + publicKey + "\" " +
                         (sToken != null && sToken.length() > 0 ? ("data-stoken=\"" + sToken + "\" ") : "") +
-                        "data-callback=\"globalOnCaptchaEntered\"></div>" +
+                        "data-callback=\"globalOnCaptchaEntered\">" + elm_txt + "</" + elm + ">" +
                         "</form>" +
                         "<script type=\"text/javascript\">" +
                         "function _overchan_add_fallback_submit() { " +
@@ -55,10 +58,11 @@ public class Recaptcha {
      * @param publicKey открытый ключ
      * @param sToken Secure Token
      */
-    public Recaptcha(String baseUrl, String publicKey, String sToken) {
+    public Recaptcha(String baseUrl, String publicKey, String sToken, boolean useButton) {
         this.baseUrl = baseUrl;
         this.publicKey = publicKey;
         this.sToken = sToken;
+        this.useButton = useButton;
     }
 
     public void handle(final Activity activity, final RecaptchaListener callback) {
@@ -134,7 +138,7 @@ public class Recaptcha {
                 dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
                 dialog.show();
                 String url = baseUrl != null ? baseUrl : "https://127.0.0.1/";
-                webView.loadDataWithBaseURL(url, getRecahtchaHtml(publicKey, sToken), "text/html", "UTF-8", null);
+                webView.loadDataWithBaseURL(url, getRecaptchaHtml(publicKey, sToken, useButton), "text/html", "UTF-8", null);
             }
         });
     }
