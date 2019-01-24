@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });*/
 
+
         mTitle = getTitle();
         mNavItemId = R.string.title_section1;
         if (savedInstanceState != null) {
@@ -128,8 +129,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation);
         navigationView.setNavigationItemSelectedListener(this);
+        Menu menuNav = navigationView.getMenu();
 
-        navigationView.getMenu().findItem(mNavItemId).setChecked(true);
+        menuNav.findItem(mNavItemId).setChecked(true);
 
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         //noinspection deprecation
@@ -158,7 +160,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(Parser.getInstance().getParserId() == DeeplinkParser.PARSER_ID){
             CastApp.getApplication().LoadParser();
         }
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation);
+        NavigationView navigationView = findViewById(R.id.navigation);
+        Parser p = Parser.getInstance();
+        Menu menuNav = navigationView.getMenu();
+        menuNav.findItem(R.string.title_section2).setVisible(!Utils.isStringEmpty(p.getPopularMovies()));
+        menuNav.findItem(R.string.title_section3).setVisible(!Utils.isStringEmpty(p.getLatestMovies()));
+        menuNav.findItem(R.string.title_section4).setVisible(!Utils.isStringEmpty(p.getPopularSeries()));
+        menuNav.findItem(R.string.title_section5).setVisible(!Utils.isStringEmpty(p.getLatestSeries()));
+
         // remove active state from settings
         if(mNavItemLast != -1) {
             navigationView.setCheckedItem(mNavItemLast);

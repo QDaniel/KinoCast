@@ -198,44 +198,30 @@ public class TVStreamsParser extends Parser {
     @SuppressWarnings("deprecation")
     @Override
     public String getSearchPage(String query) {
-        term = query;
-        rating = "1";
-        lang = "0";
-        return URL_BASE + "search";
+      return URL_BASE + "search";
     }
-
-    private String term = "";
-    private String lang = "0";
-    private String rating = "1";
 
     @Override
     public String getCineMovies() {
-        term="";
-        rating = "1";
-        lang = "2";
         return URL_BASE;
     }
 
     @Override
-    public String getPopularMovies() {
-        rating = "5";
-        lang = "0";
-        return URL_BASE;
-    }
+    public String getPopularMovies() { return null; }
 
     @Override
     public String getLatestMovies() {
-        return URL_BASE;
+        return null;
     }
 
     @Override
     public String getPopularSeries() {
-        return URL_BASE;
+        return null;
     }
 
     @Override
     public String getLatestSeries() {
-        return URL_BASE;
+        return null;
     }
 
 

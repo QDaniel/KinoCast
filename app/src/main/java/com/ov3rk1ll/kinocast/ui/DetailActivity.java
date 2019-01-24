@@ -525,7 +525,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                     mRestoreEpisodeIndex = b.getEpisode();
                 }
 
-                String seasons[] = new String[item.getSeasons().length];
+                String seasons[] = new String[item.getSeasons() == null ? 0 :  item.getSeasons().length];
                 for (int i = 0; i < seasons.length; i++) {
                     seasons[i] = String.valueOf(item.getSeasons()[i].id);
                 }
@@ -831,7 +831,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
     private String getCachedImage(int size, String type){
         TheMovieDb tmdbCache = new TheMovieDb(CastApp.GetCheckedContext(getApplication()));
         String cacheUrl = parser.getImdbLink(item);
-        JSONObject json = tmdbCache.get(cacheUrl, false);
+        JSONObject json = tmdbCache.get(cacheUrl, item, false);
         if(json != null){
             try {
                 String key = type + "_path";

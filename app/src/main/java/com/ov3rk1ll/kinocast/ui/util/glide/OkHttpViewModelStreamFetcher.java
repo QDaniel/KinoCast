@@ -48,7 +48,7 @@ public class OkHttpViewModelStreamFetcher implements DataFetcher<InputStream> {
         if(imageUrl == null || "".equalsIgnoreCase(imageUrl)){
             try {
                 //Map<String, List<String>> para = Utils.splitHashQuery(new URL(cacheUrl));
-                JSONObject json = tmdbCache.get(cacheUrl);
+                JSONObject json = tmdbCache.get(cacheUrl, model.getViewModel());
                 if(json != null){
                     String type = model.getType();
                     String key = type + "_path";
@@ -57,6 +57,8 @@ public class OkHttpViewModelStreamFetcher implements DataFetcher<InputStream> {
                         imageUrl = TheMovieDb.IMAGE_BASE_PATH + getBackdropSize(size) + json.getString(key);
                     else
                         imageUrl = TheMovieDb.IMAGE_BASE_PATH + getPosterSize(size) + json.getString(key);
+                } else {
+                    imageUrl = model.getViewModel().getImage();
                 }
                 model.getViewModel().setImage(imageUrl);
                 p.updateFromCache(tmdbCache, model.getViewModel());

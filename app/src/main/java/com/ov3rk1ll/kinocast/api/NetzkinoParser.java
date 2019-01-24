@@ -214,24 +214,14 @@ public class NetzkinoParser extends Parser {
     }
 
     @Override
-    public String getPopularMovies() {
-        return URL_BASE + "capi-2.0a/categories/1.json" + uriparam;
-    }
+    public String getPopularMovies() { return null; }
+    @Override
+    public String getLatestMovies() { return null; }
 
     @Override
-    public String getLatestMovies() {
-        return URL_BASE + "capi-2.0a/categories/1.json" + uriparam;
-    }
-
+    public String getPopularSeries() { return null; }
     @Override
-    public String getPopularSeries() {
-        return URL_BASE + "capi-2.0a/categories/1.json" + uriparam;
-    }
-
-    @Override
-    public String getLatestSeries() {
-        return URL_BASE + "capi-2.0a/categories/1.json" + uriparam;
-    }
+    public String getLatestSeries() { return null; }
 
     @Override
     public String PreSaveParserUrl(String newUrl) {

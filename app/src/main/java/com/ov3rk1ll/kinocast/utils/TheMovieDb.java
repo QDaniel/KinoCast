@@ -49,10 +49,12 @@ public class TheMovieDb {
     }
 
     public JSONObject get(String url) {
-        return get(url, true);
+        return get(url, null, true);
     }
-
-    public JSONObject get(String url, boolean fetchIfNeeded) {
+    public JSONObject get(String url, ViewModel item) {
+        return get(url, item, true);
+    }
+    public JSONObject get(String url, ViewModel item, boolean fetchIfNeeded) {
         JSONObject json;
         //String url = request.getUrl();
 
@@ -71,7 +73,11 @@ public class TheMovieDb {
         if(json == null && fetchIfNeeded) {
             try {
                 // Get IMDB-ID from page
-                ViewModel item = Parser.getInstance().loadDetail(url);
+                if(item == null) {
+                    item = Parser.getInstance().loadDetail(url);
+                } else {
+                    item = Parser.getInstance().loadDetail(item);
+                }
                 if(item == null) return  null;
                 String param = url.substring(url.indexOf("#") + 1);
                 // tt1646971?api_key=f9dc7e5d12b2640bf4ef1cf20835a1cc&language=de&external_source=imdb_id

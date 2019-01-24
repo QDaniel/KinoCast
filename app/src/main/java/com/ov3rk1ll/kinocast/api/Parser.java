@@ -55,6 +55,7 @@ public abstract class Parser {
             HDFilmeParser.class,
             NetzkinoParser.class,
             StreamworldParser.class,
+            BurningSeriesParser.class,
             TVStreamsParser.class
     };
 
@@ -303,7 +304,7 @@ public abstract class Parser {
     public void updateFromCache(TheMovieDb moviedb, ViewModel model){
 
         if(model == null) return;
-        JSONObject data = moviedb.get(model.getParser(CastApp.getContext()).getImdbLink(model), false);
+        JSONObject data = moviedb.get(model.getParser(CastApp.getContext()).getImdbLink(model), model, false);
         if(data == null) return;
 
         if(model.getRating()==0) {
@@ -360,5 +361,10 @@ public abstract class Parser {
         return newUrl;
     }
 
+    public String buildUrl(String url){
+        if(url.contains("://")) return url;
+        if(url.startsWith("/")) return  URL_BASE + url.substring(1);
+        return URL_BASE + url;
+    }
 
 }
