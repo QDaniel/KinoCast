@@ -2,7 +2,9 @@ package com.ov3rk1ll.kinocast.api;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.StringRes;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
@@ -274,13 +276,11 @@ public abstract class Parser {
 
     public abstract String getCineMovies();
 
-    public abstract String getPopularMovies();
+    public String getPopularMovies() { return null; }
+    public String getLatestMovies() { return null; }
+    public String getPopularSeries() { return null; }
+    public String getLatestSeries() { return null; }
 
-    public abstract String getLatestMovies();
-
-    public abstract String getPopularSeries();
-
-    public abstract String getLatestSeries();
 
     public String getUrl() {
         return URL_BASE;
@@ -366,5 +366,33 @@ public abstract class Parser {
         if(url.startsWith("/")) return  URL_BASE + url.substring(1);
         return URL_BASE + url;
     }
+    public String getTitleForString(int id){
+        return null;
+    }
 
+    public List<Bundle> getMenuItems(){
+        List<Bundle> list = new ArrayList<>();
+        Bundle b;
+        b = buildBundle(getCineMovies(), R.string.title_section1, "");
+        if(b != null) list.add(b);
+        b = buildBundle(getPopularMovies(), R.string.title_section2, "");
+        if(b != null) list.add(b);
+        b = buildBundle(getLatestMovies(), R.string.title_section3, "");
+        if(b != null) list.add(b);
+        b = buildBundle(getPopularSeries(), R.string.title_section4, "");
+        if(b != null) list.add(b);
+        b = buildBundle(getLatestSeries(), R.string.title_section5, "");
+        if(b != null) list.add(b);
+        return list;
+    }
+
+    protected Bundle buildBundle(String url, @StringRes int title_resid, String title){
+        if(Utils.isStringEmpty(url)) return null;
+        if(Utils.isStringEmpty(title) && title_resid == 0) return null;
+        Bundle b = new Bundle();
+        b.putInt("title_id", title_resid);
+        b.putString("title", title);
+        b.putString("url", url);
+        return b;
+    }
 }

@@ -76,6 +76,14 @@ public class SettingsActivity extends AppCompatActivity {
                     return true;
                 }
             });
+            findPreference("order_parser").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    startActivity(new Intent(getActivity(), OrderParserActivity.class));
+                    return true;
+                }
+            });
+
             findPreference("version_information").setSummary("v" + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")");
             findPreference("version_information").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override

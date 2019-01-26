@@ -93,6 +93,7 @@
         </activity>
 
         <activity android:name=".ui.OrderHostlistActivity" android:label="@string/order_hostlist"></activity>
+        <activity android:name=".ui.OrderParserActivity" android:label="@string/order_parser"></activity>
 
         <activity
             android:name=".ui.PlayerActivity"

@@ -232,6 +232,18 @@ public class Utils {
         return sparseArray;
     }
 
+    public static SparseIntArray getWeightedParser(Context context) {
+        SparseIntArray sparseArray = new SparseIntArray();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        int count = preferences.getInt("order_parser_count", -1);
+        if (count == -1) return null;
+        for (int i = 0; i < count; i++) {
+            int key = preferences.getInt("order_parser_" + i, i);
+            sparseArray.put(key, i);
+        }
+        return sparseArray;
+    }
+
     public static CastContext getCastContext(Context context) {
         try {
             return CastContext.getSharedInstance(context);

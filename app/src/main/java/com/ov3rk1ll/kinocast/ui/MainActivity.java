@@ -4,11 +4,13 @@ import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
@@ -22,6 +24,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,10 +38,17 @@ import com.google.android.gms.cast.framework.CastContext;
 import com.ov3rk1ll.kinocast.CastApp;
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.DeeplinkParser;
+import com.ov3rk1ll.kinocast.api.KinoxParser;
+import com.ov3rk1ll.kinocast.api.NothingParser;
 import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.ui.helper.layout.SearchSuggestionAdapter;
 import com.ov3rk1ll.kinocast.utils.Utils;
 import com.winsontan520.wversionmanager.library.WVersionManager;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
@@ -52,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private boolean mIsSearchView = false;
     private ProgressBar mProgressBar;
     private CastContext mCastContext;
+    private Map<Integer, Bundle> drawdata = new HashMap<>();
 
     private SearchSuggestionAdapter searchSuggestionAdapter;
     private DrawerLayout mDrawerLayout;
@@ -71,6 +82,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
         //super.setSupportProgressBarIndeterminateVisibility(visible);
         mProgressBar.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    public static List<Parser> getParserList(Context context) {
+        List<Parser> list = new ArrayList<>();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        int count = preferences.getInt("order_parser_count", -1);
+        if (count != -1) {
+            for (int i = 0; i < count; i++) {
+                int key = preferences.getInt("order_parser_" + i, 99999999);
+                if (key == NothingParser.PARSER_ID) break;
+                Parser p = Parser.getParser(context, key);
+                if (p != null) list.add(p);
+            }
+        }
+        if(list.size() < 1) list.add(Parser.getParser(context, KinoxParser.PARSER_ID));
+        return list;
     }
 
     @Override
@@ -131,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
         Menu menuNav = navigationView.getMenu();
 
-        menuNav.findItem(mNavItemId).setChecked(true);
+//        menuNav.findItem(mNavItemId).setChecked(true);
 
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         //noinspection deprecation
@@ -161,12 +188,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             CastApp.getApplication().LoadParser();
         }
         NavigationView navigationView = findViewById(R.id.navigation);
+        invalidateOptionsMenu();
         Parser p = Parser.getInstance();
-        Menu menuNav = navigationView.getMenu();
-        menuNav.findItem(R.string.title_section2).setVisible(!Utils.isStringEmpty(p.getPopularMovies()));
-        menuNav.findItem(R.string.title_section3).setVisible(!Utils.isStringEmpty(p.getLatestMovies()));
-        menuNav.findItem(R.string.title_section4).setVisible(!Utils.isStringEmpty(p.getPopularSeries()));
-        menuNav.findItem(R.string.title_section5).setVisible(!Utils.isStringEmpty(p.getLatestSeries()));
+        Menu menu = navigationView.getMenu();
+
+        AddParserMenu();
 
         // remove active state from settings
         if(mNavItemLast != -1) {
@@ -175,6 +201,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mNavItemLast = -1;
         }
 
+    }
+
+    private void AddParserMenu(){
+        NavigationView navigationView = findViewById(R.id.navigation);
+        navigationView.getMenu().clear();
+        navigationView.inflateMenu(R.menu.drawer);
+        Menu menu = navigationView.getMenu();
+        drawdata.clear();
+        int m_id = 1234;
+        List<Parser> plist = getParserList(getApplicationContext());
+        for (Parser p: plist) {
+            Menu submenu = menu.addSubMenu(p.getParserName());
+            List<Bundle> items = p.getMenuItems();
+            for (Bundle b: items) {
+                m_id++;
+                String url = b.getString("url", "");
+                if(Utils.isStringEmpty(url)) continue;
+                b.putInt("parser", p.getParserId());
+                int tid = b.getInt("title_id", 0);
+                String title = (tid>0) ? getString(tid) :b.getString("title","List");
+                b.putString("menu_title", title);
+                int mid = submenu.add(0, m_id,0 ,title).getItemId();
+                drawdata.put(mid, b);
+            }
+        }
+        navigationView.invalidate();
+    }
+
+
+    private void ConfigNavItem(Parser p, Menu menuNav, int id, String url){
+        String title = p.getTitleForString(id);
+        if(Utils.isStringEmpty(title)) title = getString(id);
+        menuNav.findItem(id).setTitle(title);
+        menuNav.findItem(id).setVisible(!Utils.isStringEmpty(url));
     }
 
     @Override
@@ -198,7 +258,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             actionBar.setTitle(mTitle);
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
@@ -346,6 +405,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.string.title_section7:
                 startActivity(new Intent(this, SettingsActivity.class));
                 break;
+            default:
+              if(drawdata.containsKey(menuItemId)){
+                  Bundle b = drawdata.get(menuItemId);
+                  Parser.setInstance(Parser.getParser(this, b.getInt("parser", 0)));
+                  query = b.getString("url");
+                  mTitle = b.getString("menu_title");
+              }
+              break;
         }
         restoreActionBar();
 

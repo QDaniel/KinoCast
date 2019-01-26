@@ -264,19 +264,10 @@ public class HDFilmeParser extends Parser {
     }
 
     @Override
-    public String getLatestMovies() {
-        return URL_BASE + "movie-movies";
-    }
-
-    @Override
     public String getPopularSeries() {
         return URL_BASE + "movie-series";
     }
 
-    @Override
-    public String getLatestSeries() {
-        return URL_BASE + "movie-series";
-    }
 
     @Override
     public String PreSaveParserUrl(String newUrl){

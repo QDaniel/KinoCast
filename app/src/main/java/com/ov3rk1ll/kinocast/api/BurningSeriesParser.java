@@ -1,5 +1,6 @@
 package com.ov3rk1ll.kinocast.api;
 
+import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
@@ -35,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class BurningSeriesParser extends Parser {
+public class BurningSeriesParser extends CachedParser {
     public static final int PARSER_ID =11;
     public static final String URL_DEFAULT = "https://bs.to/";
     public static final String TAG = "BurningSeriesParser";
@@ -107,6 +108,9 @@ public class BurningSeriesParser extends Parser {
 
     @Override
     public List<ViewModel> parseList(String url) throws IOException {
+        List<ViewModel> list = super.parseList(url);
+        if(list != null) return list;
+
         Log.i(TAG, "parseList: " + url);
         Map<String, String> cookies = new HashMap<>();
         Document doc = getDocument(url, cookies);
@@ -138,7 +142,7 @@ public class BurningSeriesParser extends Parser {
             }
         }
 
-        return list;
+        return UpdateModels(list);
     }
 
 
@@ -187,12 +191,13 @@ public class BurningSeriesParser extends Parser {
         model.setSeasons(list.toArray(new Season[list.size()]));
 
 
-        return model;
+        return UpdateModel(model);
     }
 
     @Override
     public ViewModel loadDetail(ViewModel item){
         try {
+            item = UpdateModel(item);
             Document doc = super.getDocument(getPageLink(item));
 
             return parseDetail(doc, item);
@@ -210,7 +215,7 @@ public class BurningSeriesParser extends Parser {
         try {
             Document doc = getDocument(url);
             model.setSlug(getSlug(url));
-            model = parseDetail(doc, model);
+            model = parseDetail(doc, UpdateModel(model));
 
             return model;
 
@@ -219,7 +224,6 @@ public class BurningSeriesParser extends Parser {
         }
         return null;
     }
-
 
     @Override
     public List<Host> getHosterList(ViewModel item, int season, String episode) {
@@ -240,14 +244,10 @@ public class BurningSeriesParser extends Parser {
                 if (host.isEnabled()) {
                     hostlist.add(host);
                 }
-
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return hostlist;
     }
 
@@ -346,32 +346,9 @@ public class BurningSeriesParser extends Parser {
         return getMirrorLink(queryTask, host, host.getSlug());
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public String[] getSearchSuggestions(String query) {
-        String url = KinoxParser.URL_DEFAULT + "aGET/Suggestions/?q=" + URLEncoder.encode(query) + "&limit=10&timestamp=" + SystemClock.elapsedRealtime();
-        String data = getBody(url);
-        /*try {
-            byte ptext[] = data.getBytes("ISO-8859-1");
-            data = new String(ptext, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }*/
-        String suggestions[] = data != null ? data.split("\n") : new String[0];
-        if (suggestions[0].trim().equals("")) return null;
-        // Remove duplicates
-        return new HashSet<>(Arrays.asList(suggestions)).toArray(new String[new HashSet<>(Arrays.asList(suggestions)).size()]);
-    }
-
     @Override
     public String getPageLink(ViewModel item) {
         return URL_BASE + "serie/" + item.getSlug();
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public String getSearchPage(String query) {
-        return URL_BASE + "search";
     }
 
     @Override
@@ -381,19 +358,16 @@ public class BurningSeriesParser extends Parser {
     }
 
     @Override
-    public String getPopularMovies() { return null; }
-
-    @Override
-    public String getLatestMovies() { return null; }
-
-    @Override
-    public String getPopularSeries() { return null; }
-
-    @Override
-    public String getLatestSeries() { return null; }
-
-    @Override
     public String PreSaveParserUrl(String newUrl){
         return newUrl.endsWith("/") ? newUrl : newUrl + "/";
+    }
+
+    @Override
+    public List<Bundle> getMenuItems(){
+        List<Bundle> list = new ArrayList<>();
+        Bundle b;
+        b = buildBundle(getCineMovies(), 0, "Serien");
+        if(b != null) list.add(b);
+        return list;
     }
 }

@@ -21,6 +21,11 @@
         android:summary="@string/order_hostlist_summary"
         />
 
+    <Preference
+        android:key="order_parser"
+        android:title="@string/order_parser"
+        android:summary="@string/order_parser_summary"
+        />
 
     <CheckBoxPreference
         android:defaultValue="@bool/allow_invalid_ssl_default"

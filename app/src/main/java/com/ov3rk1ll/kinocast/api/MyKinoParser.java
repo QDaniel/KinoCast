@@ -292,19 +292,10 @@ public class MyKinoParser extends Parser {
     }
 
     @Override
-    public String getLatestMovies() {
-        return URL_BASE + "xfsearch/2018";
-    }
-
-    @Override
     public String getPopularSeries() {
         return URL_BASE + "serien/";
     }
 
-    @Override
-    public String getLatestSeries() {
-        return URL_BASE + "serien/";
-    }
 
     @Override
     public String PreSaveParserUrl(String newUrl){

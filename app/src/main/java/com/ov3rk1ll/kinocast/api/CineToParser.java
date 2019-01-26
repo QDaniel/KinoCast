@@ -449,28 +449,6 @@ public class CineToParser extends Parser {
     }
 
     @Override
-    public String getPopularMovies() {
-        rating = "5";
-        lang = "0";
-        return URL_BASE + "Popular-Movies.html";
-    }
-
-    @Override
-    public String getLatestMovies() {
-        return URL_BASE + "Latest-Movies.html";
-    }
-
-    @Override
-    public String getPopularSeries() {
-        return URL_BASE + "Popular-Series.html";
-    }
-
-    @Override
-    public String getLatestSeries() {
-        return URL_BASE + "Latest-Series.html";
-    }
-
-    @Override
     public String PreSaveParserUrl(String newUrl){
         return newUrl.endsWith("/") ? newUrl : newUrl + "/";
     }

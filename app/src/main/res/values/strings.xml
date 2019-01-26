@@ -87,5 +87,7 @@ Deine Favoriten findest du im Menü auf der linken Seite.</string>
     <string name="ssl_connect_anyway">Trotzdem verbinden?</string>
     <string name="media_route_menu_title">Play on&#8230;</string>
     <string name="player_download_list_entry">Download</string>
+    <string name="order_parser">Order Parsermenü</string>
+    <string name="order_parser_summary">Sortiere deine Lieblingsparser</string>
 
 </resources>
