@@ -28,8 +28,10 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -146,61 +148,67 @@ public class BurningSeriesParser extends CachedParser {
     }
 
 
-    private ViewModel parseDetail(Document doc, ViewModel model){
+    private ViewModel parseDetail(Document doc, ViewModel model, boolean full){
         model.setType(ViewModel.Type.SERIES);
         model.setTitle(doc.select("section.serie #sp_left > h2").first().textNodes().get(0).text().trim());
         model.setSummary(doc.select("section.serie .top p.justify").text());
         model.setLanguageResId(R.drawable.lang_de_en);
         model.setImage(buildUrl(doc.select("section.serie #sp_right > img").attr("src").substring(1)));
 
-        List <Season> list = new ArrayList<>();
+        if(full) {
+            List<Season> list = new ArrayList<>();
 
-        Elements seasons = doc.select("div#seasons li > a[href*=serie/" + model.getSlug() + "/]");
-        for (Element season : seasons) {
-            Season s = new Season();
-            String cl = season.parent().attr("class").trim().replace("s","");
-            s.id = Integer.parseInt(cl);
-            s.name = season.text();
+            Elements seasons = doc.select("div#seasons li > a[href*=serie/" + model.getSlug() + "/]");
+            Elements langs = doc.select("select.series-language > option");
 
-            try {
-                Document docs = getDocument(buildUrl(season.attr("href")));
-                String urlses = "serie/" + model.getSlug() + "/" + s.id + "/";
-                Elements links = docs.select("table.episodes td > a[href*=" + urlses + "]");
-
-
-                List <String> rels = new ArrayList<>();
-                for (Element link : links) {
+            for (Element season : seasons) {
+                Season s = new Season();
+                String cl = season.parent().attr("class").trim().replace("s", "");
+                s.id = Integer.parseInt(cl);
+                s.name = season.text();
+                List<String> rels = new ArrayList<>();
+                for (Element lang : langs) {
                     try {
-                        String url = link.attr("href");
-                        if (!url.endsWith("/de") && !url.endsWith("/en")) continue;
-                        String title = link.attr("title");
-                        if (Utils.isStringEmpty(title)) continue;
-                        String epslug = url.replace(urlses,"").replace("/de", "").replace("/de", "");
-                        if(!rels.contains(epslug)) rels.add(epslug);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error parsing " + link.html(), e);
+                        Document docs = getDocument(buildUrl("serie/" + model.getSlug() + "/" + s.id + "/" + lang.val()));
+                        String urlses = "serie/" + model.getSlug() + "/" + s.id + "/";
+                        Elements links = docs.select("table.episodes td > a[href*=" + urlses + "]");
+
+                        for (Element link : links) {
+                            try {
+                                String url = link.attr("href");
+                                if (!url.endsWith("/de") && !url.endsWith("/en") && !url.endsWith("/des"))
+                                    continue;
+                                String title = link.attr("title");
+                                if (Utils.isStringEmpty(title)) continue;
+                                String epslug = url.replace(urlses, "");
+                                if (!rels.contains(epslug)) rels.add(epslug);
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error parsing " + link.html(), e);
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
+                java.util.Collections.sort(rels, new EpisodeComparator());
+
                 s.episodes = rels.toArray(new String[rels.size()]);
-            } catch (IOException e) {
-                e.printStackTrace();
+                list.add(s);
             }
-
-            list.add(s);
+            model.setSeasons(list.toArray(new Season[list.size()]));
         }
-        model.setSeasons(list.toArray(new Season[list.size()]));
-
 
         return UpdateModel(model);
     }
 
     @Override
-    public ViewModel loadDetail(ViewModel item){
+    public ViewModel loadDetail(ViewModel item, boolean showui){
         try {
             item = UpdateModel(item);
-            Document doc = super.getDocument(getPageLink(item));
-
-            return parseDetail(doc, item);
+            if(item.getSeasons() == null){
+                Document doc = super.getDocument(getPageLink(item));
+                return parseDetail(doc, item, showui);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -215,7 +223,7 @@ public class BurningSeriesParser extends CachedParser {
         try {
             Document doc = getDocument(url);
             model.setSlug(getSlug(url));
-            model = parseDetail(doc, UpdateModel(model));
+            model = parseDetail(doc, UpdateModel(model), false);
 
             return model;
 
@@ -230,7 +238,7 @@ public class BurningSeriesParser extends CachedParser {
         List<Host> hostlist = new ArrayList<>();
 
         try {
-            Document doc = super.getDocument(URL_BASE + "serie/" + item.getSlug() + "/" + season + "/" + episode + "/de");
+            Document doc = super.getDocument(URL_BASE + "serie/" + item.getSlug() + "/" + season + "/" + episode);
 
             Elements links = doc.select("ul.hoster-tabs li > a");
 
@@ -348,7 +356,7 @@ public class BurningSeriesParser extends CachedParser {
 
     @Override
     public String getPageLink(ViewModel item) {
-        return URL_BASE + "serie/" + item.getSlug();
+        return URL_BASE + "serie/" + item.getSlug() + "/de";
     }
 
     @Override
@@ -370,4 +378,29 @@ public class BurningSeriesParser extends CachedParser {
         if(b != null) list.add(b);
         return list;
     }
+
+    public class EpisodeComparator implements Comparator<String> {
+
+        public EpisodeComparator(){
+        }
+        private int getEpisodeId(String episode){
+            try {
+                int i = episode.indexOf("-");
+                if(i > 0) return Integer.parseInt(episode.substring(0, i));
+            } catch (Exception e) { }
+            return 0;
+        }
+
+        @Override
+        public int compare(String o1, String o2) {
+            int w1 = getEpisodeId(o1);
+            int w2 = getEpisodeId(o2);
+            return compate(w1, w2);
+        }
+
+        private int compate(int x, int y){
+            return (x < y) ? -1 : ((x == y) ? 0 : 1);
+        }
+    }
+
 }

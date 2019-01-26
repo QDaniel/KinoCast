@@ -76,7 +76,7 @@ public class TheMovieDb {
                 if(item == null) {
                     item = Parser.getInstance().loadDetail(url);
                 } else {
-                    item = Parser.getInstance().loadDetail(item);
+                    item = Parser.getInstance().loadDetail(item, false);
                 }
                 if(item == null) return  null;
                 String param = url.substring(url.indexOf("#") + 1);

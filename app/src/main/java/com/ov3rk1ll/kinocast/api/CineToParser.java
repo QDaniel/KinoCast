@@ -214,7 +214,7 @@ public class CineToParser extends Parser {
     }
 
     @Override
-    public ViewModel loadDetail(ViewModel item) {
+    public ViewModel loadDetail(ViewModel item, boolean showui) {
         HashMap<String, String> data = new HashMap<>();
         data.put("ID", item.getSlug());
         JSONObject doc_e = Utils.readJson(URL_BASE + "request/entry", data.entrySet());
@@ -233,7 +233,7 @@ public class CineToParser extends Parser {
         model.setSlug(parts[0]);
         model.setImdbId("tt" + parts[0]);
         model.setLanguageResId(Integer.parseInt(parts[1]));
-        return loadDetail(model);
+        return loadDetail(model, false);
     }
 
     @Override

@@ -51,14 +51,23 @@ public abstract class CachedParser extends Parser {
         return model;
     }
 
+    protected ViewModel FindModel(String slug){
+        for ( ViewModel m: lastModels) {
+            if(m.getSlug().equalsIgnoreCase(slug)) {
+                return m;
+            }
+        }
+        return null;
+    }
+
     @Override
-    public ViewModel loadDetail(ViewModel item) {
+    public ViewModel loadDetail(ViewModel item, boolean showui) {
         return UpdateModel(item);
     }
 
     @Override
     public List<Host> getHosterList(ViewModel item, int season, String episode) {
-        item = loadDetail(item);
+        item = loadDetail(item, true);
         List<Host> hostlist = new ArrayList<>();
         if(item.getMirrors() != null) {
             for (Host host : item.getMirrors()) {
@@ -70,7 +79,7 @@ public abstract class CachedParser extends Parser {
 
     @Override
     public List<ViewModel> parseList(String url) throws IOException {
-        if(url.startsWith("search:")){
+        if(!Utils.isStringEmpty(url) && url.startsWith("search:")){
             return searchModels(url.substring(7));
         }
         return null;

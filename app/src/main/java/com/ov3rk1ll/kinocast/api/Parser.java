@@ -258,7 +258,7 @@ public abstract class Parser {
 
     public abstract List<ViewModel> parseList(String url) throws IOException;
 
-    public abstract ViewModel loadDetail(ViewModel item);
+    public abstract ViewModel loadDetail(ViewModel item, boolean showui);
 
     public abstract ViewModel loadDetail(String url);
 

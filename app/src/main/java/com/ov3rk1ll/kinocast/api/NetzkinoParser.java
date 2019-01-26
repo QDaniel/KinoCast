@@ -124,7 +124,7 @@ public class NetzkinoParser extends Parser {
     }
 
     @Override
-    public ViewModel loadDetail(ViewModel item) {
+    public ViewModel loadDetail(ViewModel item, boolean showui) {
         if(lastModels == null) return item;
         for ( ViewModel m: lastModels) {
             if(item.getSlug().equalsIgnoreCase(m.getSlug())) return m;
@@ -165,7 +165,7 @@ public class NetzkinoParser extends Parser {
 
     @Override
     public List<Host> getHosterList(ViewModel item, int season, String episode) {
-        item = loadDetail(item);
+        item = loadDetail(item, false);
         List<Host> hostlist = new ArrayList<>();
         for (Host host : item.getMirrors()) {
             hostlist.add(host);

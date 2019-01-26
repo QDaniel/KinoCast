@@ -25,7 +25,8 @@ import java.util.List;
 
 public class TVStreamsParser extends CachedParser {
     public static final int PARSER_ID = 6;
-    public static final String URL_DEFAULT = "https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/iptv/clean/clean_tv_main.m3u";
+    public static final String URL_DEFAULT = "https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/iptv/clean/clean_tv.m3u";
+    public static final String URL_RADIO = "https://raw.githubusercontent.com/jnk22/kodinerds-iptv/master/iptv/clean/clean_radio.m3u";
     public static final String TAG = "TVStreamsParser";
 
 
@@ -36,7 +37,7 @@ public class TVStreamsParser extends CachedParser {
 
     @Override
     public String getParserName() {
-        return "M3U Streams";
+        return "IPTV";
     }
 
     @Override
@@ -124,9 +125,10 @@ public class TVStreamsParser extends CachedParser {
     public List<Bundle> getMenuItems(){
         List<Bundle> list = new ArrayList<>();
         Bundle b;
-        b = buildBundle(getCineMovies(), 0, "Streams");
+        b = buildBundle(getCineMovies(), 0, "TV");
         if(b != null) list.add(b);
-        return list;
+        b = buildBundle(URL_RADIO, 0, "Radio");
+        if(b != null) list.add(b);       return list;
     }
 
     class M3UItem {

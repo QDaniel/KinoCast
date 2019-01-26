@@ -27,6 +27,7 @@ import com.ov3rk1ll.kinocast.ui.helper.layout.ResultRecyclerAdapter;
 import com.ov3rk1ll.kinocast.utils.BookmarkManager;
 import com.ov3rk1ll.kinocast.utils.ExceptionAsyncTask;
 import com.ov3rk1ll.kinocast.utils.TheMovieDb;
+import com.ov3rk1ll.kinocast.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -218,8 +219,12 @@ public class ListFragment extends Fragment {
 
                 if(!b.isInternal()) {
                     Parser p = Parser.getParser(CastApp.GetCheckedContext(getParams()[0]), b.getParserId());
-                    ViewModel model = p.loadDetail(b.getUrl());
-                    if(model != null) list.add(model);
+                    try {
+                        if(!Utils.isStringEmpty(b.getUrl())) {
+                            ViewModel model = p.loadDetail(b.getUrl());
+                            if (model != null) list.add(model);
+                        }
+                    } catch(Exception e) { }
                 }
             }
             return list.toArray(new ViewModel[list.size()]);

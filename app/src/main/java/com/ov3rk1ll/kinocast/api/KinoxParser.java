@@ -176,7 +176,7 @@ public class KinoxParser extends Parser{
     }
 
     @Override
-    public ViewModel loadDetail(ViewModel item){
+    public ViewModel loadDetail(ViewModel item, boolean showui){
         try {
             Document doc = super.getDocument(URL_BASE + "Stream/" + item.getSlug() + ".html");
 

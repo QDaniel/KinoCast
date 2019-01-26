@@ -219,7 +219,7 @@ public class StreamworldParser extends Parser {
     }
 
     @Override
-    public ViewModel loadDetail(ViewModel item){
+    public ViewModel loadDetail(ViewModel item, boolean showui){
         try {
             Document doc = super.getDocument(URL_BASE + "film/" + item.getSlug() + ".html");
 

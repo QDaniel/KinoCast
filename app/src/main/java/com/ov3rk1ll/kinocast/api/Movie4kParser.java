@@ -101,7 +101,7 @@ public class Movie4kParser extends Parser{
     }
 
     @Override
-    public ViewModel loadDetail(ViewModel item){
+    public ViewModel loadDetail(ViewModel item, boolean showui){
         try {
             Document doc = Jsoup.connect(URL_BASE + "Stream/" + item.getSlug() + ".html")
                     .userAgent(Utils.USER_AGENT)

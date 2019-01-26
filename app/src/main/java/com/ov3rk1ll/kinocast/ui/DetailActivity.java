@@ -485,7 +485,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
         @Override
         protected Boolean doInBackground() throws Exception {
-            item = parser.loadDetail(item);
+            item = parser.loadDetail(item, true);
             if(item!=null) {
                 Map<String, String> articleParams = new HashMap<>();
                 articleParams.put("parser", parser.getParserName());

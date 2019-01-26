@@ -157,7 +157,7 @@ public class HDFilmeParser extends Parser {
     }
 
     @Override
-    public ViewModel loadDetail(ViewModel item) {
+    public ViewModel loadDetail(ViewModel item, boolean showui) {
         try {
             Document doc = super.getDocument(URL_BASE + item.getSlug());
 
