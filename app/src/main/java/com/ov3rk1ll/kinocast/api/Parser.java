@@ -58,7 +58,8 @@ public abstract class Parser {
             NetzkinoParser.class,
             StreamworldParser.class,
             BurningSeriesParser.class,
-            TVStreamsParser.class
+            TVStreamsParser.class,
+            PornkinoParser.class
     };
 
     private static List<Parser> instances = new ArrayList<>();
@@ -165,6 +166,19 @@ public abstract class Parser {
     }
 
     public static Document getDocument(String url, Map<String, String> cookies) throws IOException {
+        Response response = getDocumentResponse(url, cookies);
+        String body = response.body().string();
+        if (response.code() != 200) {
+            Log.d(TAG, body);
+            throw new IOException("Unexpected status code " + response.code());
+        }
+        if (TextUtils.isEmpty(body)) {
+            throw new IOException("Body for " + url + " is empty");
+        }
+        return Jsoup.parse(body);
+    }
+
+    public static Response getDocumentResponse(String url, Map<String, String> cookies) throws IOException {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -179,17 +193,10 @@ public abstract class Parser {
                 );
             }
         }
-        Response response = client.newCall(request).execute();
-        String body = response.body().string();
-        if (response.code() != 200) {
-            Log.d(TAG, body);
-            throw new IOException("Unexpected status code " + response.code());
-        }
-        if (TextUtils.isEmpty(body)) {
-            throw new IOException("Body for " + url + " is empty");
-        }
-        return Jsoup.parse(body);
+        return client.newCall(request).execute();
     }
+
+
 
     //seems to need interceptor too
     public String getBody(String url) {
