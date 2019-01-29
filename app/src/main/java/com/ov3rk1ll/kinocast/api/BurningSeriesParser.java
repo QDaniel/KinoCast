@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BurningSeriesParser extends CachedParser {
@@ -163,8 +164,13 @@ public class BurningSeriesParser extends CachedParser {
 
             for (Element season : seasons) {
                 Season s = new Season();
-                String cl = season.parent().attr("class").trim().replace("s", "");
-                s.id = Integer.parseInt(cl);
+                Set<String> cls = season.parent().classNames();
+                for (String cl: cls) {
+                    if(cl.startsWith("s") && cl.length() < 4){
+                        s.id = Integer.parseInt(cl.substring(1));
+                    }
+                }
+
                 s.name = season.text();
                 List<String> rels = new ArrayList<>();
                 for (Element lang : langs) {
