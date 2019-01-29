@@ -121,6 +121,11 @@
                 <data android:scheme="https" android:host="vivo.sx" android:pathPattern="/.........." />
                 <data android:scheme="https" android:host="vshare.eu" android:pathPattern="/.*\.htm" />
                 <data android:scheme="https" android:host="oload.fun" android:pathPattern="/embed/.*" />
+                <data android:scheme="https" android:host="oload.fun" android:pathPattern="/f/.*" />
+                <data android:scheme="https" android:host="oload.club" android:pathPattern="/embed/.*" />
+                <data android:scheme="https" android:host="oload.club" android:pathPattern="/f/.*" />
+                <data android:scheme="https" android:host="openload.co" android:pathPattern="/embed/.*" />
+                <data android:scheme="https" android:host="openload.co" android:pathPattern="/f/.*" />
                 <data android:scheme="https" android:host="rapidvideo.com" android:pathPattern="/e/.*" />
                 <data android:scheme="https" android:host="www.rapidvideo.com" android:pathPattern="/e/.*" />
                 <data android:scheme="https" android:host="vidoza.net" android:pathPattern="/............*" />

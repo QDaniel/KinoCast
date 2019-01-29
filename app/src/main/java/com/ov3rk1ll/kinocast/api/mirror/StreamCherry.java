@@ -1,6 +1,7 @@
 package com.ov3rk1ll.kinocast.api.mirror;
 
 import android.annotation.SuppressLint;
+import android.net.Uri;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
@@ -101,5 +102,15 @@ public class StreamCherry extends Host {
         if(Utils.isStringEmpty(solvedUrl[0])) return null;
         return solvedUrl[0];
 
+    }
+
+    @Override
+    public Boolean canHandleUri(Uri uri) {
+        return ("streamcherry.com".equalsIgnoreCase(uri.getHost())
+                ||  "www.streamcherry.com".equalsIgnoreCase(uri.getHost()));
+    }
+    @Override
+    public void handleUri(Uri uri) {
+        setUrl(uri.toString());
     }
 }

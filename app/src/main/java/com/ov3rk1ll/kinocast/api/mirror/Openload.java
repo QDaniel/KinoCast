@@ -42,7 +42,13 @@ public class Openload extends Host {
         queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getdatafrom, url));
 
         Log.d(TAG, "resolve " + url);
-        if(url.contains("embed/")){
+        if(url.contains("f/")){
+            String id = url.substring(url.indexOf("f/") + 6);
+            if(id.contains("/")) id = id.substring(0, id.indexOf("/"));
+            queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getvideoforid,id));
+            url = "https://oload.fun/embed/" + id + "/";
+        }
+        else if(url.contains("embed/")){
         String id = url.substring(url.indexOf("embed/") + 6);
         if(id.contains("/")) id = id.substring(0, id.indexOf("/"));
             queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getvideoforid,id));
@@ -111,7 +117,13 @@ public class Openload extends Host {
 
     @Override
     public Boolean canHandleUri(Uri uri) {
-        return "oload.fun".equalsIgnoreCase(uri.getHost()) && uri.getPath().contains("embed/");
+
+        if("oload.fun".equalsIgnoreCase(uri.getHost())
+                || "oload.club".equalsIgnoreCase(uri.getHost())
+                || "openload.co".equalsIgnoreCase(uri.getHost())) {
+            if(uri.getPath().contains("embed/") || uri.getPath().contains("f/")) return true;
+        }
+        return false;
     }
     @Override
     public void handleUri(Uri uri) {
