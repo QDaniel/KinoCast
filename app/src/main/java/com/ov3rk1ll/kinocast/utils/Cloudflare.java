@@ -164,11 +164,13 @@ public class Cloudflare {
     private void getCheckAnswer(String str) throws InterruptedException, IOException {
         String jschl_vc = regex(str,"name=\"jschl_vc\" value=\"(.+?)\"").get(0);    //正则取值
         String pass = regex(str,"name=\"pass\" value=\"(.+?)\"").get(0);            //
+        String s = regex(str,"name=\"s\" value=\"(.+?)\"").get(0);            //
         double jschl_answer = get_answer(str);
         e(String.valueOf(jschl_answer));
         Thread.sleep(3000);
+        if(!Utils.isStringEmpty(s)) s = "s="+s+"&";
         String req = String.valueOf("https://"+ConnUrl.getHost())+"/cdn-cgi/l/chk_jschl?"
-                +"jschl_vc="+jschl_vc+"&pass="+pass+"&jschl_answer="+jschl_answer;
+                + "jschl_vc=" + jschl_vc + "&pass=" + pass + "&jschl_answer=" + jschl_answer;
         e("RedirectUrl",req);
         getRedirectResponse(req);
     }

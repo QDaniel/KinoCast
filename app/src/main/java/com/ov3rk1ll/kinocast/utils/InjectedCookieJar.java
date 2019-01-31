@@ -52,13 +52,13 @@ public class InjectedCookieJar extends PersistentCookieJar {
         String domain = hc.getDomain();
         if(domain.startsWith("."))  domain = domain.substring(1);
         cb.domain(domain)
-                .expiresAt(hc.getMaxAge())
+                .expiresAt(hc.getMaxAge() * 1000)
                 .name(hc.getName())
                 .value(hc.getValue())
                 .path(hc.getPath());
         if(hc.getSecure()) cb.secure();
         if(hc.getMaxAge()<0) cb.expiresAt(0);
-        else cb.expiresAt(System.currentTimeMillis() + hc.getMaxAge());
+        else cb.expiresAt(System.currentTimeMillis() + (hc.getMaxAge() * 1000));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             if(hc.isHttpOnly()) cb.httpOnly();
         }

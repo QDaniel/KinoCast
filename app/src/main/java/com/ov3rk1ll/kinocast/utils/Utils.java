@@ -10,6 +10,7 @@ import android.util.Log;
 import android.util.SparseIntArray;
 
 import com.google.android.gms.cast.framework.CastContext;
+import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.api.Parser;
 
 import org.json.JSONException;
@@ -18,17 +19,10 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
-import java.security.KeyStore;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 
 import okhttp3.CipherSuite;
 import okhttp3.ConnectionSpec;
@@ -40,8 +34,8 @@ import okhttp3.Response;
 import okhttp3.TlsVersion;
 
 public class Utils {
-    //public static final String USER_AGENT = "KinoCast v" + BuildConfig.VERSION_NAME;
-    public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36";
+    public static final String USER_AGENT = "KinoCast v" + BuildConfig.VERSION_NAME;
+    //public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36";
     public static boolean DisableSSLCheck = false;
 
     public static boolean isStringEmpty(String val) {

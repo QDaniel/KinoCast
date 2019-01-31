@@ -22,6 +22,7 @@ import com.franmontiel.persistentcookiejar.cache.CookieCache;
 import com.franmontiel.persistentcookiejar.persistence.CookiePersistor;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class PersistentCookieJar implements ClearableCookieJar {
         persistor.saveAll(filterPersistentCookies(cookies));
     }
 
-    private static List<Cookie> filterPersistentCookies(List<Cookie> cookies) {
+    private static List<Cookie> filterPersistentCookies(Iterable<Cookie> cookies) {
         List<Cookie> persistentCookies = new ArrayList<>();
 
         for (Cookie cookie : cookies) {
@@ -97,4 +98,9 @@ public class PersistentCookieJar implements ClearableCookieJar {
         cache.clear();
         persistor.clear();
     }
+
+    synchronized public void save() {
+        persistor.saveAll(filterPersistentCookies(cache));
+    }
+
 }

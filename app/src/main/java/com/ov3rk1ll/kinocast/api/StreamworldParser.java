@@ -118,9 +118,7 @@ public class StreamworldParser extends Parser {
     @Override
     public List<ViewModel> parseList(String url) throws IOException {
         Log.i("Parser", "parseList: " + url);
-        Map<String, String> cookies = new HashMap<>();
-        cookies.put("ListMode", "cover");
-        Document doc = getDocument(url, cookies);
+        Document doc = getDocument(url);
         return parseList(doc);
     }
     private List<ViewModel> parseList(Document doc) {

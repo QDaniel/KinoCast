@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 
 import okhttp3.Cookie;
-import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -145,11 +144,6 @@ public abstract class Parser {
 
     private void initHttpClient(Context context) {
         injectedCookieJar = InjectedCookieJar.Build(context);
-        List<Cookie> colist = injectedCookieJar.loadForRequest(HttpUrl.parse(URL_BASE));
-        injectedCookieJar.clear();
-        for (Cookie co: colist) {
-            injectedCookieJar.addCookie(co);
-        }
         OkHttpClient.Builder okclient = new OkHttpClient.Builder()
                 .followRedirects(false)
                 .followSslRedirects(false)

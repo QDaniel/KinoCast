@@ -46,7 +46,7 @@ public class CloudflareDdosInterceptor implements Interceptor {
             String body = response.body().string();
 
             if (body.contains("DDoS protection by Cloudflare") && !request.url().toString().contains("/cdn-cgi/l/chk_jschl")) {
-                final CountDownLatch latch = new CountDownLatch (1);
+                final CountDownLatch latch = new CountDownLatch(1);
                 Cloudflare cf = new Cloudflare(request.url().toString());
                 cf.setUser_agent(Utils.USER_AGENT);
                 cf.getCookies(new Cloudflare.cfCallback() {
@@ -58,6 +58,7 @@ public class CloudflareDdosInterceptor implements Interceptor {
                         for (HttpCookie cookie : cookieList) {
                             jar.addCookie(cookie);
                         }
+                        jar.save();
                         latch.countDown();
                     }
 
