@@ -58,6 +58,7 @@ public abstract class Parser {
             StreamworldParser.class,
             BurningSeriesParser.class,
             TVStreamsParser.class,
+            TVDEParser.class,
             PornkinoParser.class
     };
 

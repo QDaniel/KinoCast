@@ -9,8 +9,8 @@ repositories {
 
 def versionMajor = 2
 def versionMinor = 0
-def versionPatch = 3
-def versionBuild = 99 // bump for dogfood builds, public betas, etc.
+def versionPatch = 4
+def versionBuild = 1 // bump for dogfood builds, public betas, etc.
 ext {
     calculateVersionName = {
         def version = "${versionMajor}.${versionMinor}.${versionPatch}"
