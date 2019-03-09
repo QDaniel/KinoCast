@@ -107,12 +107,8 @@ public class Cloudflare {
                 e("Get Cookie Failed");
                 callback.onFail();
             }
-
-
         }
     }
-
-
 
     private void getVisiteCookie() throws IOException, InterruptedException {
         ConnUrl = new URL(mUrl);

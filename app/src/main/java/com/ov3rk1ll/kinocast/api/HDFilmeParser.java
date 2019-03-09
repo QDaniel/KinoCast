@@ -119,8 +119,7 @@ public class HDFilmeParser extends Parser {
     @Override
     public List<ViewModel> parseList(String url) throws IOException {
         Log.i("Parser", "parseList: " + url);
-        Map<String, String> cookies = new HashMap<>();
-        Document doc = getDocument(url, cookies);
+        Document doc = getDocument(url);
         return parseList(doc);
     }
 
@@ -136,7 +135,7 @@ public class HDFilmeParser extends Parser {
             //model.setGenre(doc.select("li[Title=Genre]").text());
 
             List<Host> hostlist = new ArrayList<>();
-            Elements files = doc.select("ul.list-film  li a.new");
+            Elements files = doc.select("ul.list-film li a.new");
             int i=0;
             for (Element file : files) {
                 i++;

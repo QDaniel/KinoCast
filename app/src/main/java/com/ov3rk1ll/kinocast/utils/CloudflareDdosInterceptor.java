@@ -52,13 +52,15 @@ public class CloudflareDdosInterceptor implements Interceptor {
                 cf.getCookies(new Cloudflare.cfCallback() {
                     @Override
                     public void onSuccess(List<HttpCookie> cookieList) {
-                        Log.v(TAG, "Success: Cloudflare.getCookies : " + Cloudflare.listToString(cookieList));
-                        InjectedCookieJar jar = (InjectedCookieJar) Parser.getInstance().getClient().cookieJar();
+                        if(cookieList != null) {
+                            Log.v(TAG, "Success: Cloudflare.getCookies : " + Cloudflare.listToString(cookieList));
+                            InjectedCookieJar jar = (InjectedCookieJar) Parser.getInstance().getClient().cookieJar();
 
-                        for (HttpCookie cookie : cookieList) {
-                            jar.addCookie(cookie);
+                            for (HttpCookie cookie : cookieList) {
+                                jar.addCookie(cookie);
+                            }
+                            jar.save();
                         }
-                        jar.save();
                         latch.countDown();
                     }
 

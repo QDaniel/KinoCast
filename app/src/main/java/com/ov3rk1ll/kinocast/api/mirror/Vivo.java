@@ -41,7 +41,7 @@ public class Vivo extends Host {
             Document doc = Utils.buildJsoup(url)
                     .get();
 
-            String base64 = doc.select("div#player").attr("data-stream");
+            String base64 = doc.select("#player").attr("data-stream");
 
             byte[] data = android.util.Base64.decode(base64, android.util.Base64.DEFAULT);
             return new String(data, StandardCharsets.UTF_8);
