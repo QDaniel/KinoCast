@@ -87,15 +87,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static List<Parser> getParserList(Context context) {
         List<Parser> list = new ArrayList<>();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        int count = preferences.getInt("order_parser_count", -1);
-        if (count != -1) {
-            for (int i = 0; i < count; i++) {
-                int key = preferences.getInt("order_parser_" + i, 99999999);
-                if (key == NothingParser.PARSER_ID) break;
-                Parser p = Parser.getParser(context, key);
-                if (p != null) list.add(p);
-            }
-        }
+        int key = Integer.parseInt(preferences.getString("parser", "0"));
+        list.add(Parser.getParser(context, key));
         if(list.size() < 1) list.add(Parser.getParser(context, KinoxParser.PARSER_ID));
         return list;
     }
