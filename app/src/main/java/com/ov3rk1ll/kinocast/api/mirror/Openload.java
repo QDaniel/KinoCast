@@ -82,11 +82,11 @@ public class Openload extends Host {
                         webView.evaluateJavascript(
                                 "(function() {" +
                                         " document.querySelector(\"div#videooverlay\").click();" +
-                                        " return document.querySelector(\"video\").getAttribute(\"src\") })();",
+                                        " return document.querySelector(\"video.vjs-tech\").getAttribute(\"src\") })();",
                                 new ValueCallback<String>() {
                                     @Override
                                     public void onReceiveValue(String html) {
-                                        // code h   ere
+                                        // code here
                                         Log.d("HTML", html);
                                         solvedUrl[0] = html;
                                         requestDone[0] = true;
