@@ -129,12 +129,16 @@
                 <data android:scheme="https" android:host="rapidvideo.com" android:pathPattern="/e/.*" />
                 <data android:scheme="https" android:host="www.rapidvideo.com" android:pathPattern="/e/.*" />
                 <data android:scheme="https" android:host="vidoza.net" android:pathPattern="/............*" />
-                <data android:scheme="https" android:host="streamcherry.com " android:pathPattern="/f/.*" />
-                <data android:scheme="https" android:host="streamcherry.com " android:pathPattern="/embed/.*" />
-                <data android:scheme="https" android:host="streamango.com " android:pathPattern="/f/.*" />
-                <data android:scheme="https" android:host="streamango.com " android:pathPattern="/embed/.*" />
+                <data android:scheme="https" android:host="streamcherry.com" android:pathPattern="/f/.*" />
+                <data android:scheme="https" android:host="streamcherry.com" android:pathPattern="/embed/.*" />
+                <data android:scheme="https" android:host="streamango.com" android:pathPattern="/f/.*" />
+                <data android:scheme="https" android:host="streamango.com" android:pathPattern="/embed/.*" />
             </intent-filter>
-
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/*" />
+            </intent-filter>
         </activity>
         <provider
             android:name="android.support.v4.content.FileProvider"

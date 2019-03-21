@@ -42,7 +42,19 @@ public class StreamCherry extends Host {
         queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getdatafrom, url));
 
         Log.d(TAG, "resolve " + url);
-        queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getvideoforid,"0"));
+        if(url.contains("/f/")){
+            String id = url.substring(url.indexOf("/f/") + 3);
+            if(id.contains("/")) id = id.substring(0, id.indexOf("/"));
+            queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getvideoforid,id));
+            url = "https://streamcherry.com/embed/" + id + "/";
+        }
+        else if(url.contains("/embed/")){
+            String id = url.substring(url.indexOf("/embed/") + 7);
+            if(id.contains("/")) id = id.substring(0, id.indexOf("/"));
+            queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getvideoforid,id));
+            url = "https://streamcherry.com/embed/" + id + "/";
+        }
+
         String link = getLink(url);
 
         Log.d(TAG, "Request. Got " + link);

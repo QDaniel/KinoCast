@@ -43,7 +43,7 @@ public class Openload extends Host {
 
         Log.d(TAG, "resolve " + url);
         if(url.contains("f/")){
-            String id = url.substring(url.indexOf("f/") + 6);
+            String id = url.substring(url.indexOf("f/") + 2);
             if(id.contains("/")) id = id.substring(0, id.indexOf("/"));
             queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getvideoforid,id));
             url = "https://oload.fun/embed/" + id + "/";

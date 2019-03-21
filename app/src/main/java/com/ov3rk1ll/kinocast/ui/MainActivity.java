@@ -96,6 +96,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (p != null) list.add(p);
             }
         }
+        int key = Integer.parseInt(preferences.getString("parser", "0"));
+        if(key>0){
+            boolean found = false;
+            for ( Parser p: list) {
+                if(p.getParserId() == key) found = true;
+            }
+            if (!found)
+                list.add(Parser.getParser(context, key));
+        }
         if(list.size() < 1) list.add(Parser.getParser(context, KinoxParser.PARSER_ID));
         return list;
     }
