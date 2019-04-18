@@ -10,7 +10,6 @@ import com.ov3rk1ll.kinocast.utils.Utils;
 import org.jsoup.nodes.Document;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 public class Vivo extends Host {
     private static final String TAG = Vivo.class.getSimpleName();

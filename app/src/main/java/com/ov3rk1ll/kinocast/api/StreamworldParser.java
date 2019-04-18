@@ -1,18 +1,9 @@
 package com.ov3rk1ll.kinocast.api;
 
-import android.annotation.SuppressLint;
-import android.os.Build;
 import android.os.SystemClock;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.view.View;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
-import android.webkit.ValueCallback;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.mirror.Host;
@@ -22,36 +13,24 @@ import com.ov3rk1ll.kinocast.api.mirror.StreamCherry;
 import com.ov3rk1ll.kinocast.api.mirror.Streamango;
 import com.ov3rk1ll.kinocast.api.mirror.VidCloud;
 import com.ov3rk1ll.kinocast.api.mirror.Vidoza;
-import com.ov3rk1ll.kinocast.api.mirror.Vivo;
-import com.ov3rk1ll.kinocast.data.Season;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
-import com.ov3rk1ll.kinocast.ui.MainActivity;
 import com.ov3rk1ll.kinocast.utils.Recaptcha;
 import com.ov3rk1ll.kinocast.utils.TheMovieDb;
 import com.ov3rk1ll.kinocast.utils.Utils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class StreamworldParser extends Parser {
     public static final int PARSER_ID =10;

@@ -53,6 +53,7 @@ public abstract class Parser {
             //Movie4kParser.class,
             MyKinoParser.class,
             CineToParser.class,
+            FilmpalastParser.class,
             HDFilmeParser.class,
             NetzkinoParser.class,
             StreamworldParser.class,

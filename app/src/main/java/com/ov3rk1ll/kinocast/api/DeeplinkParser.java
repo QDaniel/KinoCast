@@ -1,27 +1,12 @@
 package com.ov3rk1ll.kinocast.api;
 
 import android.net.Uri;
-import android.os.Parcel;
-import android.os.SystemClock;
-import android.support.annotation.Nullable;
-import android.util.Log;
 
-import com.ov3rk1ll.kinocast.R;
-import com.ov3rk1ll.kinocast.api.mirror.Direct;
 import com.ov3rk1ll.kinocast.api.mirror.Host;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
-import com.ov3rk1ll.kinocast.utils.Utils;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.jsoup.Jsoup;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 public class DeeplinkParser extends CachedParser {

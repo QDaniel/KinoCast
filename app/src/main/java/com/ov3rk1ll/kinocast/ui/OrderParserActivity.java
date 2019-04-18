@@ -19,7 +19,6 @@ import android.widget.Toast;
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.NothingParser;
 import com.ov3rk1ll.kinocast.api.Parser;
-import com.ov3rk1ll.kinocast.api.mirror.Host;
 import com.ov3rk1ll.kinocast.utils.Utils;
 import com.woxthebox.draglistview.DragItemAdapter;
 import com.woxthebox.draglistview.DragListView;

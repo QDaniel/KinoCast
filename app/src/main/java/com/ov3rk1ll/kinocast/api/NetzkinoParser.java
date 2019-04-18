@@ -2,16 +2,10 @@ package com.ov3rk1ll.kinocast.api;
 
 import android.os.SystemClock;
 import android.util.Log;
-import android.util.SparseArray;
-import android.util.SparseIntArray;
 
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.mirror.Direct;
-import com.ov3rk1ll.kinocast.api.mirror.DivxStage;
 import com.ov3rk1ll.kinocast.api.mirror.Host;
-import com.ov3rk1ll.kinocast.api.mirror.SharedSx;
-import com.ov3rk1ll.kinocast.api.mirror.Sockshare;
-import com.ov3rk1ll.kinocast.api.mirror.StreamCloud;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
 import com.ov3rk1ll.kinocast.utils.Utils;
@@ -19,26 +13,17 @@ import com.ov3rk1ll.kinocast.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
-public class NetzkinoParser extends Parser {
+public class NetzkinoParser extends CachedParser {
     public static final int PARSER_ID = 8;
     public static final String TAG = "NetzkinoParser";
     public static final String URL_DEFAULT = "http://api.netzkino.de.simplecache.net/";
-
-    private final List<ViewModel> lastModels = new ArrayList<>();
 
     @Override
     public String getDefaultUrl() {
@@ -109,44 +94,24 @@ public class NetzkinoParser extends Parser {
         } catch (Exception e) {
             Log.e(TAG, "Error parsing " + doc.toString(), e);
         }
-        AddModels(list);
+        UpdateModels(list);
         return list;
     }
 
-    private void AddModels(List<ViewModel> models){
-        List<String> slugs = new ArrayList<>();
-        for ( ViewModel m: lastModels) {
-            slugs.add(m.getSlug());
-        }
-        for ( ViewModel m: models) {
-            if(!slugs.contains(m.getSlug())) lastModels.add(m);
-        }
-    }
-
-    @Override
-    public ViewModel loadDetail(ViewModel item, boolean showui) {
-        if(lastModels == null) return item;
-        for ( ViewModel m: lastModels) {
-            if(item.getSlug().equalsIgnoreCase(m.getSlug())) return m;
-        }
-        return item;
-    }
 
     @Override
     public ViewModel loadDetail(String url) {
         url = parseSlug(url);
         if(url == null) return null;
 
-        for ( ViewModel m: lastModels) {
-            if(url.equalsIgnoreCase(m.getSlug())) return m;
-        }
+        ViewModel m = FindModel(url);
+        if(m != null) return m;
+
         try {
             List<ViewModel> list = parseList(getSearchPage(url.replace("-", " ").replace("_", " ")));
-            AddModels(list);
+            UpdateModels(list);
 
-            for ( ViewModel m: lastModels) {
-                if(url.equalsIgnoreCase(m.getSlug())) return m;
-            }
+            return FindModel(url);
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -155,7 +120,7 @@ public class NetzkinoParser extends Parser {
     }
 
     private String parseSlug(String url) {
-        if(url == null || lastModels == null) return null;
+        if(url == null) return null;
         url = url.substring(url.indexOf("filme/") + 6);
         int i = url.indexOf("/");
         if(i < 1) i = url.indexOf("#");

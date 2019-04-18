@@ -1,10 +1,7 @@
 package com.ov3rk1ll.kinocast.api;
 
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
-import android.util.SparseArray;
-import android.util.SparseIntArray;
 
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.mirror.Direct;
@@ -17,10 +14,7 @@ import org.jsoup.Connection;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 public class TVStreamsParser extends CachedParser {

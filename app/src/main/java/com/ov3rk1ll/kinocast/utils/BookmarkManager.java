@@ -2,11 +2,9 @@ package com.ov3rk1ll.kinocast.utils;
 
 import android.content.Context;
 import android.os.Environment;
-import android.provider.ContactsContract;
 import android.text.TextUtils;
 
 import com.ov3rk1ll.kinocast.CastApp;
-import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 
 import java.io.File;

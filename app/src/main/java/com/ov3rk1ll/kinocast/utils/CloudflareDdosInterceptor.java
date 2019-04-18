@@ -1,17 +1,9 @@
 package com.ov3rk1ll.kinocast.utils;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.SystemClock;
 import android.util.Log;
-import android.view.View;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import com.ov3rk1ll.kinocast.api.Parser;
-import com.ov3rk1ll.kinocast.ui.MainActivity;
 
 import java.io.IOException;
 import java.net.HttpCookie;
@@ -19,7 +11,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import okhttp3.Cookie;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;

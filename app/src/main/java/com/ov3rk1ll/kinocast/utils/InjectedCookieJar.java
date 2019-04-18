@@ -8,9 +8,6 @@ import com.franmontiel.persistentcookiejar.cache.CookieCache;
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
 import com.franmontiel.persistentcookiejar.persistence.CookiePersistor;
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor;
-import com.google.android.gms.common.util.Strings;
-
-import org.jsoup.helper.StringUtil;
 
 import java.net.HttpCookie;
 import java.util.ArrayList;

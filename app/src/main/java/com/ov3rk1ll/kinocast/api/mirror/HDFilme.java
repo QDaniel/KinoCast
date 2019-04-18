@@ -1,15 +1,10 @@
 package com.ov3rk1ll.kinocast.api.mirror;
 
 import android.text.TextUtils;
-import android.util.Log;
 
-import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
-import com.ov3rk1ll.kinocast.utils.Utils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;

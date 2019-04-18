@@ -6,13 +6,8 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.ov3rk1ll.kinocast.R;
-import com.ov3rk1ll.kinocast.api.mirror.Direct;
-import com.ov3rk1ll.kinocast.api.mirror.DivxStage;
 import com.ov3rk1ll.kinocast.api.mirror.HDFilme;
 import com.ov3rk1ll.kinocast.api.mirror.Host;
-import com.ov3rk1ll.kinocast.api.mirror.SharedSx;
-import com.ov3rk1ll.kinocast.api.mirror.Sockshare;
-import com.ov3rk1ll.kinocast.api.mirror.StreamCloud;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
 
@@ -24,10 +19,8 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 public class HDFilmeParser extends Parser {
     public static final int PARSER_ID = 7;

@@ -2,11 +2,8 @@ package com.ov3rk1ll.kinocast.api;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.SparseArray;
-import android.util.SparseIntArray;
 
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.mirror.Host;
@@ -18,8 +15,6 @@ import com.ov3rk1ll.kinocast.api.mirror.VidCloud;
 import com.ov3rk1ll.kinocast.api.mirror.Vidoza;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
-import com.ov3rk1ll.kinocast.utils.Recaptcha;
-import com.ov3rk1ll.kinocast.utils.TheMovieDb;
 import com.ov3rk1ll.kinocast.utils.Utils;
 
 import org.jsoup.Jsoup;
@@ -30,13 +25,7 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import okhttp3.Response;
 

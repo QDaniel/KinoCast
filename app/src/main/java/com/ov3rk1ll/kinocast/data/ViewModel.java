@@ -10,6 +10,7 @@ import java.io.Serializable;
 public class ViewModel implements Serializable {
 
     private int seriesID;
+    private int min_age;
     private String slug;
     private String title;
     private String image;
@@ -29,7 +30,7 @@ public class ViewModel implements Serializable {
     private transient Parser parser;
 
     public ViewModel() {
-
+        min_age = -1;
     }
 
     public int getSeriesID() {
@@ -127,6 +128,10 @@ public class ViewModel implements Serializable {
     public void setImdbId(String imdbId) {
         this.imdbId = imdbId;
     }
+
+    public int getMinAge() { return min_age; }
+
+    public void setMinAge(int min_age) { this.min_age = min_age; }
 
     public int getParserId() {
         return parserId;

@@ -33,6 +33,7 @@ import java.util.Set;
 public class KinoxParser extends Parser{
     public static final int PARSER_ID = 0;
     public static final String URL_DEFAULT = "https://kinos.to/";
+    public static final String TAG = "KinoxParser";
 
     private static final SparseIntArray languageResMap = new SparseIntArray();
     private static final SparseArray<String> languageKeyMap = new SparseArray<>();
@@ -104,7 +105,7 @@ public class KinoxParser extends Parser{
 
                 list.add(model);
             }catch (Exception e){
-                Log.e("Kinox", "Error parsing " + element.html(), e);
+                Log.e(TAG, "Error parsing " + element.html(), e);
             }
         }
         return list;
@@ -112,7 +113,7 @@ public class KinoxParser extends Parser{
 
     @Override
     public List<ViewModel> parseList(String url) throws IOException {
-        Log.i("Parser", "parseList: " + url);
+        Log.i(TAG, "parseList: " + url);
         Map<String, String> cookies = new HashMap<>();
         cookies.put("ListMode", "cover");
         Document doc = getDocument(url, cookies);
@@ -312,19 +313,18 @@ public class KinoxParser extends Parser{
     @SuppressWarnings("deprecation")
     @Override
     public String[] getSearchSuggestions(String query){
-        String url = URL_BASE + "aGET/Suggestions/?q=" + URLEncoder.encode(query) + "&limit=10&timestamp=" + SystemClock.elapsedRealtime();
-        String data = getBody(url);
-        /*try {
-            byte ptext[] = data.getBytes("ISO-8859-1");
-            data = new String(ptext, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }*/
+        return searchSuggestions(query, this);
+    }
+
+    public static String[] searchSuggestions(String query, Parser p){
+        String url = KinoxParser.URL_DEFAULT + "aGET/Suggestions/?q=" + URLEncoder.encode(query) + "&limit=10&timestamp=" + SystemClock.elapsedRealtime();
+        String data = p.getBody(url);
         String suggestions[] = data != null ? data.split("\n") : new String[0];
         if(suggestions[0].trim().equals("")) return null;
         // Remove duplicates
         return new HashSet<>(Arrays.asList(suggestions)).toArray(new String[new HashSet<>(Arrays.asList(suggestions)).size()]);
     }
+
 
     @Override
     public String getPageLink(ViewModel item){
