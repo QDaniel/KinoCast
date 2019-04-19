@@ -31,6 +31,8 @@ public abstract class Host implements Serializable {
             Vivo.class,
             Openload.class,
             RapidVideo.class,
+            VeryStream.class,
+            VevIo.class,
             Direct.class
     };
 
