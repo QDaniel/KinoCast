@@ -317,7 +317,7 @@ public class CineToParser extends Parser {
                 if (timeout <= 0)
                     break;
             }
-            if (solvedUrl[0] != null) {
+            if (solvedUrl[0] != null && !solvedUrl[0].contains("cine.to")) {
 
                 return solvedUrl[0];
             }
@@ -387,7 +387,11 @@ public class CineToParser extends Parser {
                     done.wait(1000); // wait here until the listener fires
                 }
             }
-            return Utils.getRedirectTarget(url + "?token=" + solvedUrl[0]);
+            String redi =  Utils.getRedirectTarget(url + "?token=" + solvedUrl[0]);
+            if (redi != null && !redi.contains("cine.to")) {
+                return redi;
+            }
+
 
         } catch (Exception e1) {
             e1.printStackTrace();

@@ -19,7 +19,6 @@ public class ViewModel implements Serializable {
     private int languageResId;
     private String genre;
     private String imdbId;
-    @SuppressWarnings("unused")
     private String year;
 
     private Type type;
@@ -132,6 +131,10 @@ public class ViewModel implements Serializable {
     public int getMinAge() { return min_age; }
 
     public void setMinAge(int min_age) { this.min_age = min_age; }
+
+    public String getYear() { return year; }
+
+    public void setYear(String year) { this.year = year; }
 
     public int getParserId() {
         return parserId;

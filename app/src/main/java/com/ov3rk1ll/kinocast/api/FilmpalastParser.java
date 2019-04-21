@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FilmpalastParser extends Parser {
     public static final int PARSER_ID = 15;
@@ -32,6 +34,8 @@ public class FilmpalastParser extends Parser {
 
     private static final SparseIntArray languageResMap = new SparseIntArray();
     private static final SparseArray<String> languageKeyMap = new SparseArray<>();
+
+    private static final Pattern mPattern;
 
     static {
         languageResMap.put(1, R.drawable.lang_en);
@@ -70,6 +74,8 @@ public class FilmpalastParser extends Parser {
         languageKeyMap.put(25, "ru");
         languageResMap.put(26, R.drawable.lang_hi);
         languageKeyMap.put(26, "hi");
+
+        mPattern = Pattern.compile(" Veröffentlicht: ([1-2][0-9]{3}) ");
     }
 
     @Override
@@ -139,6 +145,13 @@ public class FilmpalastParser extends Parser {
             Elements ratings = element.select("div#star-rate > img[src*=star_on]");
             model.setRating(ratings.size());
 
+            String info = element.select("ul#detail-content-list > li").text();
+            Matcher matcher = mPattern.matcher(info);
+            if(matcher.find())
+            {
+                model.setYear(matcher.group(1));
+            }
+
             List<Host> hostlist = new ArrayList<>();
             Elements hosts = doc.select("ul.currentStreamLinks a.iconPlay[target=_blank]");
             int i = 0;
@@ -161,7 +174,7 @@ public class FilmpalastParser extends Parser {
     @Override
     public ViewModel loadDetail(ViewModel item, boolean showui){
         try {
-            Document doc = super.getDocument(URL_BASE + item.getSlug());
+            Document doc = getDocument(URL_BASE + item.getSlug());
 
             return parseDetail(doc, item);
         } catch (IOException e) {

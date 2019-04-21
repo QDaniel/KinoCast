@@ -7,6 +7,7 @@ import com.ov3rk1ll.kinocast.utils.Utils;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 public abstract class Host implements Serializable {
     protected int mirror;
@@ -14,6 +15,7 @@ public abstract class Host implements Serializable {
     protected String urlVideo;
     protected String slug;
     protected String comment;
+    protected int status;
 
     public static Class<?>[] HOSTER_LIST = {
             DivxStage.class,
@@ -133,6 +135,10 @@ public abstract class Host implements Serializable {
         this.slug = slug;
     }
 
+    public int getStatus() { return status; }
+
+    public void setStatus(int status) { this.status = status; }
+
     public String getVideoPath(DetailActivity.QueryPlayTask queryTask) {
         return null;
     }
@@ -141,6 +147,9 @@ public abstract class Host implements Serializable {
     public String toString() {
         String text = getName() + " #" + mirror;
         if(!Utils.isStringEmpty(comment)) text = text + " (" + comment + ")";
+        if(getStatus() == 1) text = text + " [OK]";
+        else if(getStatus() == 2) text = text + " [DEL]";
+        else if(getStatus() == 3) text = text + " [?]";
         return text;
     }
 
@@ -151,4 +160,16 @@ public abstract class Host implements Serializable {
 
     }
 
+    public static Host searchBySlugUrl(List<Host> mirrors, int host_id, String host_slug, String url) {
+        for (Host h: mirrors) {
+            if(h.getId() == host_id && (h.getSlug().equalsIgnoreCase(host_slug) || url.equalsIgnoreCase(h.getUrl()))) return h;
+        }
+        return null;
+    }
+    public static Host searchByUrl(List<Host> mirrors, String url) {
+        for (Host h: mirrors) {
+            if(url.equalsIgnoreCase(h.getUrl())) return h;
+        }
+        return null;
+    }
 }
