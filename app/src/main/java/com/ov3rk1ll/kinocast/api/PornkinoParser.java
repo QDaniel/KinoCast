@@ -93,9 +93,9 @@ public class PornkinoParser extends Parser {
 
 
     private ViewModel parseDetail(Document doc, ViewModel model, boolean showui){
+        String title = doc.select("div#content h1.post-header-title").text();
 
-
-        model.setTitle(doc.select("div#content > h1.post-header-title").text());
+        if(!Utils.isStringEmpty(title)) model.setTitle(title);
         model.setSummary(doc.select("div#content p.description").text());
         model.setLanguageResId(R.drawable.lang_de);
         model.setType(ViewModel.Type.MOVIE);
@@ -128,7 +128,6 @@ public class PornkinoParser extends Parser {
                             if (host == null) continue;
                             int count = getHostCount(hostlist, host);
                             host.setMirror(count + 1);
-
                             String lid = link.select("td button").attr("onclick");
                             if(!lid.startsWith("openLink('")) continue;
                             lid = lid.substring(10);

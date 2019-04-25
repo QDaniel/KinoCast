@@ -1,10 +1,11 @@
 package com.ov3rk1ll.kinocast.utils;
-
+import android.net.Uri;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.eclipsesource.v8.V8;
+import com.eclipsesource.v8.V8RuntimeException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class Cloudflare {
 
     private static final int MAX_COUNT = 3;
     private static final int CONN_TIMEOUT = 60000;
-    private static final String ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;";
+    private static final String ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3";
 
     private boolean canVisit = false;
 
@@ -90,6 +91,7 @@ public class Cloudflare {
                 }
             } catch (IOException | InterruptedException e) {
                 if (mCookieList!=null){
+                    mCookieList= new ArrayList<>(mCookieList);
                     mCookieList.clear();
                 }
                 e.printStackTrace();
@@ -106,8 +108,12 @@ public class Cloudflare {
                 e("Get Cookie Failed");
                 callback.onFail();
             }
+
+
         }
     }
+
+
 
     private void getVisiteCookie() throws IOException, InterruptedException {
         ConnUrl = new URL(mUrl);
@@ -157,15 +163,18 @@ public class Cloudflare {
      * @param str
      */
     private void getCheckAnswer(String str) throws InterruptedException, IOException {
-        String jschl_vc = regex(str,"name=\"jschl_vc\" value=\"(.+?)\"").get(0);    //正则取值
+        String s = regex(str,"name=\"s\" value=\"(.+?)\"").get(0);   //正则取值
+        String jschl_vc = regex(str,"name=\"jschl_vc\" value=\"(.+?)\"").get(0);
         String pass = regex(str,"name=\"pass\" value=\"(.+?)\"").get(0);            //
-        String s = regex(str,"name=\"s\" value=\"(.+?)\"").get(0);            //
         double jschl_answer = get_answer(str);
         e(String.valueOf(jschl_answer));
         Thread.sleep(3000);
-        if(!Utils.isStringEmpty(s)) s = "s="+s+"&";
-        String req = String.valueOf("https://"+ConnUrl.getHost())+"/cdn-cgi/l/chk_jschl?"
-                + "jschl_vc=" + jschl_vc + "&pass=" + pass + "&jschl_answer=" + jschl_answer;
+        String req = String.valueOf("https://"+ConnUrl.getHost())+"/cdn-cgi/l/chk_jschl?";
+        if (!TextUtils.isEmpty(s)){
+            s = Uri.encode(s);
+            req+="s="+s+"&";
+        }
+        req+="jschl_vc="+Uri.encode(jschl_vc)+"&pass="+Uri.encode(pass)+"&jschl_answer="+jschl_answer;
         e("RedirectUrl",req);
         getRedirectResponse(req);
     }
@@ -176,11 +185,12 @@ public class Cloudflare {
         mGetRedirectionConn.setRequestMethod("GET");
         mGetRedirectionConn.setConnectTimeout(CONN_TIMEOUT);
         mGetRedirectionConn.setReadTimeout(CONN_TIMEOUT);
+        mGetRedirectionConn.setUseCaches(false);
         if (!TextUtils.isEmpty(mUser_agent)){
             mGetRedirectionConn.setRequestProperty("user-agent",mUser_agent);
         }
         mGetRedirectionConn.setRequestProperty("accept",ACCEPT);
-        mGetRedirectionConn.setRequestProperty("referer", req);
+        mGetRedirectionConn.setRequestProperty("referer", mUrl);
         if (mCookieList!=null&&mCookieList.size()>0){
             mGetRedirectionConn.setRequestProperty("cookie",listToString(mCookieList));
         }
@@ -244,15 +254,28 @@ public class Cloudflare {
                     "(.+?)=\\{\"(.+?)\"");
             String varA = s.get(0);
             String varB = s.get(1);
+            String div_cfdn = getCfdnDOM(str);
+            List<String> eval_fuc = null;
+            if (!TextUtils.isEmpty(div_cfdn)){
+                eval_fuc = checkEval(str);
+            }
+
             StringBuilder sb = new StringBuilder();
+            sb.append("var t=\"").append(new URL(mUrl).getHost()).append("\";");
             sb.append("var a=");
             sb.append(regex(str,varA+"=\\{\""+varB+"\":(.+?)\\}").get(0));
             sb.append(";");
             List<String> b = regex(str,varA+"\\."+varB+"(.+?)\\;");
-            for (int i =0;i<b.size()-1;i++){
-                sb.append("a");
-                sb.append(b.get(i));
-                sb.append(";");
+            if (b != null) {
+                for (int i =0;i<b.size()-1;i++){
+                    sb.append("a");
+                    if (eval_fuc!=null&&eval_fuc.size()>0){
+                        sb.append(replaceEval(b.get(i),div_cfdn,eval_fuc));
+                    }else {
+                        sb.append(b.get(i));
+                    }
+                    sb.append(";");
+                }
             }
 
             e("add",sb.toString());
@@ -260,18 +283,54 @@ public class Cloudflare {
             a = v8.executeDoubleScript(sb.toString());
             List<String> fixNum = regex(str,"toFixed\\((.+?)\\)");
             if (fixNum!=null){
+                e("toFix",fixNum.get(0));
                 a = Double.parseDouble(v8.executeStringScript("String("+String.valueOf(a)+".toFixed("+fixNum.get(0)+"));"));
             }
-            a += new URL(mUrl).getHost().length();
+//            a += new URL(mUrl).getHost().length();
             v8.release();
         }catch (IndexOutOfBoundsException e){
             e("answerErr","get answer error");
             e.printStackTrace();
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }catch (V8RuntimeException e){
+            e("scriptRuntimeErr","script runtime error,check the js code");
             e.printStackTrace();
         }
         return a;
+    }
+
+    private String replaceEval(String s, String div_cfdn, List<String> eval_fuc) {
+        List<String> eval = regex(s,"eval\\(eval\\((.+?)");
+        if (eval==null||eval.size()==0){
+            return s;
+        }
+        s = s.replace(eval_fuc.get(0),div_cfdn);
+        s+=";"+eval_fuc.get(1);
+        return s;
+    }
+
+    private List<String> checkEval(String str) {
+        List<String> evalDom = regex(str,"function\\(p\\)\\{var p = (.+?)\\;(.+?)\\;");
+        if (evalDom==null||evalDom.size()==0){
+            return null;
+        }else {
+            return evalDom;
+        }
+    }
+
+    private String getCfdnDOM(String str) {
+        String dom = regex(str,"k \\= \\'(.+?)\\'\\;").get(0);
+        if (!TextUtils.isEmpty(dom)){
+            String cfdn = regex(str,"id=\""+dom+"\">(.+?)</div>").get(0);
+            if (!TextUtils.isEmpty(cfdn)){
+                return cfdn;
+            }else {
+                return "";
+            }
+        }else {
+            return "";
+        }
     }
 
     /**
@@ -297,8 +356,8 @@ public class Cloudflare {
             return group;
         }catch (NullPointerException e){
             Log.i("MATCH","null");
+            return null;
         }
-        return null;
     }
 
     /**

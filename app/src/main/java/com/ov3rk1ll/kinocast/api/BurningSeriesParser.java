@@ -336,7 +336,9 @@ public class BurningSeriesParser extends CachedParser {
                 }
             }
 
-            return Utils.getRedirectTarget(uri + "?t=" + solvedUrl[0] + "&s=" + sec);
+            String ret = Utils.getRedirectTarget(uri + "?t=" + solvedUrl[0] + "&s=" + sec);
+            if (ret != null && !ret.contains("/bs.to/"))
+                return ret;
 
         } catch (Exception e1) {
             e1.printStackTrace();

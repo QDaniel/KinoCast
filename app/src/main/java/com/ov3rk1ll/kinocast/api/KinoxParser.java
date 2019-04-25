@@ -120,7 +120,7 @@ public class KinoxParser extends Parser{
         return parseList(doc);
     }
 
-    private ViewModel parseDetail(Document doc, ViewModel item){
+    private ViewModel parseDetail(Document doc, ViewModel item, boolean showui){
         if(doc.select("select#SeasonSelection").size() > 0){
             item.setType(ViewModel.Type.SERIES);
             String rel = doc.select("select#SeasonSelection").attr("rel");
@@ -181,7 +181,7 @@ public class KinoxParser extends Parser{
         try {
             Document doc = super.getDocument(URL_BASE + "Stream/" + item.getSlug() + ".html");
 
-            return parseDetail(doc, item);
+            return parseDetail(doc, item, showui);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -218,7 +218,7 @@ public class KinoxParser extends Parser{
             rating = rating.trim();
             model.setRating(Float.valueOf(rating));
 
-            model = parseDetail(doc, model);
+            model = parseDetail(doc, model, false);
 
             return model;
 
@@ -267,12 +267,12 @@ public class KinoxParser extends Parser{
         Method getLink = null;
 
         try {
-            queryTask.updateProgress("Get host from " + URL_BASE + url);
+            if(queryTask!=null) queryTask.updateProgress("Get host from " + URL_BASE + url);
             JSONObject json = getJson(URL_BASE + url);
             Document doc = Jsoup.parse(json != null ? json.getString("Stream") : null);
             href = getMirrorLink(doc);
 
-            queryTask.updateProgress("Get video from " + href);
+            if(queryTask!=null) queryTask.updateProgress("Get video from " + href);
             return href;
         } catch (Exception e1) {
             e1.printStackTrace();
