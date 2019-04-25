@@ -1,5 +1,6 @@
 package com.ov3rk1ll.kinocast.ui;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -177,26 +178,30 @@ public class ListFragment extends Fragment {
 
         @Override
         protected void onPostExecute(ViewModel[] viewModels) {
-            TheMovieDb tmdbCache = new TheMovieDb(CastApp.GetCheckedContext(getActivity()));
+            Activity activity = getActivity();
+            if(activity != null) {
 
-            if(viewModels != null){
-                for(ViewModel m: viewModels){
-                    m.getParser(CastApp.GetCheckedContext(getActivity())).updateFromCache(tmdbCache, m);
-                    adapter.add(m, adapter.getItemCount());
+                TheMovieDb tmdbCache = new TheMovieDb(CastApp.GetCheckedContext(activity));
+
+                if (viewModels != null) {
+                    for (ViewModel m : viewModels) {
+                        Boolean add = true;
+                        m.getParser(activity).updateFromCache(tmdbCache, m);
+                        if (add) adapter.add(m, adapter.getItemCount());
+                    }
+                } else {
+                    getException().printStackTrace();
+                    FlurryAgent.onError(getString(R.string.connection_error_title), getString(R.string.connection_error_message, Parser.getInstance().getUrl()), getException());
+                    activity.findViewById(R.id.list).setVisibility(View.GONE);
+                    ((TextView) activity.findViewById(R.id.text_error)).setText(
+                            getString(R.string.connection_error_title) + "\n" +
+                                    getString(R.string.connection_error_message, Parser.getInstance().getUrl()) +
+                                    "\n" + getException().getMessage()
+                    );
+                    activity.findViewById(R.id.layout_error).setVisibility(View.VISIBLE);
                 }
-            }else{
-                getException().printStackTrace();
-                FlurryAgent.onError(getString(R.string.connection_error_title), getString(R.string.connection_error_message, Parser.getInstance().getUrl()) , getException());
-                getActivity().findViewById(R.id.list).setVisibility(View.GONE);
-                ((TextView)getActivity().findViewById(R.id.text_error)).setText(
-                        getString(R.string.connection_error_title) + "\n" +
-                        getString(R.string.connection_error_message, Parser.getInstance().getUrl()) +
-                        "\n" + getException().getMessage()
-                );
-                getActivity().findViewById(R.id.layout_error).setVisibility(View.VISIBLE);
+                ((AppCompatActivity) activity).setSupportProgressBarIndeterminateVisibility(false);
             }
-            if(getActivity() != null)
-                ((AppCompatActivity)getActivity()).setSupportProgressBarIndeterminateVisibility(false);
             super.onPostExecute(viewModels);
         }
     }
