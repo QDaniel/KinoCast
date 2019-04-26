@@ -486,19 +486,20 @@ public class WVersionManager {
             else
                 Toast.makeText(context, "File downloaded", Toast.LENGTH_SHORT).show();
 
-            //Open file
-            Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
-            Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", localFile);
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) uri = Uri.fromFile(localFile);
-            Log.i(TAG, "onPostExecute: SDK " + Integer.toString(Build.VERSION.SDK_INT) + " open " + uri);
-            intent.setDataAndType(uri, "application/vnd.android.package-archive");
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-
-            try {
-                context.startActivity(intent);
-            } catch (ActivityNotFoundException e) {
-                context.startActivity(Intent.createChooser(intent, "Chooser"));
+            if(localFile != null) {
+                //Open file
+                Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+                Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", localFile);
+                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) uri = Uri.fromFile(localFile);
+                Log.i(TAG, "onPostExecute: SDK " + Integer.toString(Build.VERSION.SDK_INT) + " open " + uri);
+                intent.setDataAndType(uri, "application/vnd.android.package-archive");
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+                try {
+                    context.startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    context.startActivity(Intent.createChooser(intent, "Chooser"));
+                }
             }
         }
     }
