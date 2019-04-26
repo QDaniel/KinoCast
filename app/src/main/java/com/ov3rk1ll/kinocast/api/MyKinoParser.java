@@ -283,7 +283,7 @@ public class MyKinoParser extends Parser {
 
     @Override
     public String getCineMovies() {
-        return URL_BASE + "xfsearch/2018";
+        return URL_BASE + "xfsearch/year/2019/";
     }
 
     @Override

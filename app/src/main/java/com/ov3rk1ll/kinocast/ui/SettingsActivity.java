@@ -6,6 +6,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -56,6 +57,8 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     public static class SettingsFragment extends PreferenceFragment {
+        private EditTextPreference url_pref = null;
+
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setupSimplePreferencesScreen();
@@ -110,6 +113,8 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                 });
             }
+            url_pref = (EditTextPreference) findPreference("url");
+            url_pref.setKey("url_" + String.valueOf(Parser.getInstance().getParserId()));
 
             ListPreference parser = (ListPreference) findPreference("parser");
             List<CharSequence> eT = new ArrayList<>();
@@ -126,19 +131,23 @@ public class SettingsActivity extends AppCompatActivity {
             parser.setEntries(eT.toArray(new CharSequence[0]));
             parser.setEntryValues(eV.toArray(new CharSequence[0]));
             bindPreferenceSummaryToValue(parser);
+
             parser.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o) {
-
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                    Parser.selectParser(getActivity(), Integer.parseInt(o.toString()), preferences.getString("url", ""));
+                    url_pref.setKey("url_" + o.toString());
+                    String prefurl = preferences.getString(url_pref.getKey(), "");
+                    Parser.selectParser(getActivity(), Integer.parseInt(o.toString()), prefurl);
                     sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, o);
+                    url_pref.setText(prefurl);
+                    url_pref.setSummary(prefurl);
                     return true;
                 }
             });
 
-            bindPreferenceSummaryToValue(findPreference("url"));
-            findPreference("url").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            bindPreferenceSummaryToValue(url_pref);
+            url_pref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o) {
 
@@ -150,9 +159,9 @@ public class SettingsActivity extends AppCompatActivity {
                     if(!o.toString().equalsIgnoreCase("")){
                         o = Parser.getInstance().PreSaveParserUrl(o.toString());
                     }
+                    sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, o);
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     Parser.selectParser(getActivity(), Integer.parseInt(preferences.getString("parser", Integer.toString(KinoxParser.PARSER_ID))), o.toString());
-                    preference.setSummary(o.toString());
                     return true;
                 }
             });
