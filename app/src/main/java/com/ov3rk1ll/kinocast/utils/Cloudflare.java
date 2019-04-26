@@ -89,7 +89,7 @@ public class Cloudflare {
                 }else {
                     getVisiteCookie();
                 }
-            } catch (IOException | InterruptedException e) {
+            } catch (Exception e) {
                 if (mCookieList!=null){
                     mCookieList= new ArrayList<>(mCookieList);
                     mCookieList.clear();
