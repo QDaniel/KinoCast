@@ -411,12 +411,10 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             //NavUtils.navigateUpFromSameTask(this);
             return true;
         } else if (id == R.id.action_share) {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(parser.getPageLink(this.item)));
-            startActivity(intent);
+            openUrl(parser.getPageLink(this.item));
             return true;
         } else if (id == R.id.action_imdb) {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.imdb.com/title/" + this.item.getImdbId()));
-            startActivity(intent);
+            openUrl("http://www.imdb.com/title/" + this.item.getImdbId());
             return true;
         } else if (id == R.id.action_bookmark_on) {
             //Remove bookmark
@@ -440,6 +438,15 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openUrl(String url) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            startActivity(intent);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void setMirrorSpinner(Host mirrors[]) {
