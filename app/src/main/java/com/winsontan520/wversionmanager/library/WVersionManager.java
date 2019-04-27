@@ -17,6 +17,7 @@ import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.flurry.android.FlurryAgent;
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.R;
 
@@ -471,16 +472,21 @@ public class WVersionManager {
         @Override
         protected void onProgressUpdate(Integer... progress) {
             super.onProgressUpdate(progress);
-            // if we get here, length is known, now set indeterminate to false
-            mProgressDialog.setIndeterminate(false);
-            mProgressDialog.setMax(100);
-            mProgressDialog.setProgress(progress[0]);
+            try {
+                // if we get here, length is known, now set indeterminate to false
+                mProgressDialog.setIndeterminate(false);
+                mProgressDialog.setMax(100);
+                mProgressDialog.setProgress(progress[0]);
+            } catch(Exception e) { FlurryAgent.onError("",e.getMessage(), e); }
         }
 
         @Override
         protected void onPostExecute(String result) {
-            mWakeLock.release();
-            mProgressDialog.dismiss();
+            try {
+                mWakeLock.release();
+                mProgressDialog.dismiss();
+            } catch(Exception e) { FlurryAgent.onError("",e.getMessage(), e); }
+
             if (result != null)
                 Toast.makeText(context, "Download error: " + result, Toast.LENGTH_LONG).show();
             else

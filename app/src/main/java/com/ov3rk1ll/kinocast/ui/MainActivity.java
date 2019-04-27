@@ -192,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
+        CastApp.setCurrentActivity(this);
         if(Parser.getInstance().getParserId() == DeeplinkParser.PARSER_ID){
             CastApp.getApplication().LoadParser();
         }

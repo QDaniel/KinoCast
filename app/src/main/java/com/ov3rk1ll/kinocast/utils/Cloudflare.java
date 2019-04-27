@@ -1,4 +1,6 @@
 package com.ov3rk1ll.kinocast.utils;
+import android.app.Activity;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -6,11 +8,18 @@ import android.util.Log;
 
 import com.eclipsesource.v8.V8;
 import com.eclipsesource.v8.V8RuntimeException;
+import com.ov3rk1ll.kinocast.api.Parser;
+import com.ov3rk1ll.kinocast.ui.DetailActivity;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -19,20 +28,31 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Cloudflare {
+import okhttp3.Cookie;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
+import static android.media.CamcorderProfile.get;
+import static com.ov3rk1ll.kinocast.utils.Utils.enableTls12OnPreLollipop;
+
+public class Cloudflare {
+    private final String TAG = "Cloudflare";
     private String mUrl;
     private String mUser_agent;
     private cfCallback mCallback;
     private int mRetry_count;
     private URL ConnUrl;
-    private List<HttpCookie> mCookieList;
+    private List<Cookie> mCookieList;
     private CookieManager mCookieManager;
     private HttpURLConnection mCheckConn;
     private HttpURLConnection mGetMainConn;
@@ -43,14 +63,36 @@ public class Cloudflare {
     private static final String ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3";
 
     private boolean canVisit = false;
+    private InjectedCookieJar injectedCookieJar;
+    private OkHttpClient client;
+    private Activity activity;
 
-    public Cloudflare(String url) {
+
+    public Cloudflare(Activity context, String url) {
         mUrl = url;
+        activity = context;
+        mUser_agent = Utils.USER_AGENT;
+        initHttpClient(context);
     }
 
-    public Cloudflare(String url, String user_agent) {
+    public Cloudflare(Activity context, String url, String user_agent) {
         mUrl = url;
         mUser_agent = user_agent;
+        activity = context;
+        initHttpClient(context);
+    }
+
+    private void initHttpClient(Context context) {
+        injectedCookieJar = Parser.injectedCookieJar;
+        OkHttpClient.Builder okclient = new OkHttpClient.Builder()
+                .followRedirects(false)
+                .followSslRedirects(false)
+                .addNetworkInterceptor(new UserAgentInterceptor(mUser_agent))
+                .cookieJar(injectedCookieJar)
+                .connectTimeout(CONN_TIMEOUT, TimeUnit.MILLISECONDS)
+                .readTimeout(CONN_TIMEOUT, TimeUnit.MILLISECONDS)
+                .dns(new CustomDns());
+        client = enableTls12OnPreLollipop(okclient).build();
     }
 
     public String getUser_agent() {
@@ -108,14 +150,40 @@ public class Cloudflare {
                 e("Get Cookie Failed");
                 callback.onFail();
             }
-
-
         }
     }
 
-
-
     private void getVisiteCookie() throws IOException, InterruptedException {
+        Request request = new Request.Builder()
+                .url(mUrl)
+                .addHeader("User-Agent", mUser_agent)
+                .addHeader("Accept", ACCEPT)
+                .addHeader("Referer", mUrl)
+                .build();
+
+        Response resp = client.newCall(request).execute();
+        String str = resp.body().string();
+        Log.v(TAG, "getVisiteCookie: " + mUrl);
+        Log.v(TAG, " - Code: " + resp.code());
+        Log.v(TAG, " - Head: " + resp.headers().toString());
+        Log.v(TAG, " - Body: " + str);
+
+        switch (resp.code()) {
+            case HttpURLConnection.HTTP_OK:
+                e("MainUrl","visit website success");
+                return;
+            case HttpURLConnection.HTTP_FORBIDDEN:
+                e("MainUrl","IP block or cookie err");
+                return;
+            case HttpURLConnection.HTTP_UNAVAILABLE:
+                getCheckAnswer(str);
+                break;
+            default:
+                break;
+        }
+        /*
+
+
         ConnUrl = new URL(mUrl);
         mGetMainConn = (HttpURLConnection) ConnUrl.openConnection();
         mGetMainConn.setRequestMethod("GET");
@@ -155,7 +223,7 @@ public class Cloudflare {
             default:
 
                 break;
-        }
+        }*/
     }
 
     /**
@@ -169,7 +237,8 @@ public class Cloudflare {
         double jschl_answer = get_answer(str);
         e(String.valueOf(jschl_answer));
         Thread.sleep(3000);
-        String req = String.valueOf("https://"+ConnUrl.getHost())+"/cdn-cgi/l/chk_jschl?";
+        Uri uri = Uri.parse(mUrl);
+        String req = "https://" + uri.getHost() + "/cdn-cgi/l/chk_jschl?";
         if (!TextUtils.isEmpty(s)){
             s = Uri.encode(s);
             req+="s="+s+"&";
@@ -179,7 +248,93 @@ public class Cloudflare {
         getRedirectResponse(req);
     }
 
-    private void getRedirectResponse(String req) throws IOException {
+    private void getRedirectResponse(String url) throws IOException {
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("User-Agent", mUser_agent)
+                .addHeader("Accept", ACCEPT)
+                .addHeader("Referer", mUrl)
+                .build();
+
+        Response resp = client.newCall(request).execute();
+        String str = resp.body().string();
+        Log.v(TAG, "getRedirectResponse: " + url);
+        Log.v(TAG, " - Code: " + resp.code());
+        Log.v(TAG, " - Head: " + resp.headers().toString());
+        Log.v(TAG, " - Body: " + str);
+
+        switch (resp.code()){
+            case HttpURLConnection.HTTP_OK:
+                mCookieList = new ArrayList<>(Arrays.asList(injectedCookieJar.toArray()));
+                break;
+            case HttpURLConnection.HTTP_FORBIDDEN:
+                e("MainUrl","IP block or cookie err");
+                if(str.contains("g-recaptcha")){
+                    Document doc = Jsoup.parse(str);
+                    Element form = doc.select("form#challenge-form").first();
+                    String token = "";
+                    String sec = form.select("input[name=s]").val();
+                    String html = form.html();
+                    int i = html.indexOf("data-sitekey=\"");
+                    if(i<0)
+                        throw new IOException("No Sitekey found. Code:" + resp.code());
+                    String skey = html.substring(i + 14);
+                    i = skey.indexOf("\"");
+                    if(i<0)  throw new IOException("No Sitekey End found. Code:" + resp.code());
+
+                    skey = skey.substring(0, i);
+                    Recaptcha rc = new Recaptcha(url, skey, token, false);
+                    final String[] solvedUrl = {null};
+                    final AtomicBoolean done = new AtomicBoolean(false);
+                    try{
+                        rc.handle(activity, new Recaptcha.RecaptchaListener() {
+                            @Override
+                            public void onHashFound(String hash) {
+                                solvedUrl[0] = hash;
+                                done.set(true);
+                            }
+
+                            @Override
+                            public void onError(Exception ex)
+                            {
+                                done.set(true);
+                            }
+
+                            @Override
+                            public void onCancel()
+                            {
+                                done.set(true);
+                            }
+                        });
+                        synchronized (done) {
+                            while (done.get() == false) {
+                                try {
+                                    done.wait(1000); // wait here until the listener fires
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e ) {
+                        e.printStackTrace();
+                    }
+
+                    Log.e(TAG, " Recatcha Token: " +  solvedUrl[0]);
+                    Uri uri = Uri.parse(url);
+                    getRedirectResponse("https://" + uri.getHost() + "/cdn-cgi/l/chk_captcha?s=" + skey + "&t=" + solvedUrl[0]);
+                }
+
+
+                break;
+
+            case HttpURLConnection.HTTP_MOVED_TEMP:
+                mCookieList = new ArrayList<>(Arrays.asList(injectedCookieJar.toArray()));
+                break;
+            default:
+                throw new IOException("getOtherResponse Code: " + resp.code());
+        }
+/*
         HttpURLConnection.setFollowRedirects(false);
         mGetRedirectionConn = (HttpURLConnection) new URL(req).openConnection();
         mGetRedirectionConn.setRequestMethod("GET");
@@ -206,10 +361,25 @@ public class Cloudflare {
             default:throw new IOException("getOtherResponse Code: "+
                     mGetRedirectionConn.getResponseCode());
         }
+*/
     }
 
+    private int checkUrl() throws IOException {
+        Request request = new Request.Builder()
+                .url(mUrl)
+                .addHeader("User-Agent", mUser_agent)
+                .addHeader("Accept", ACCEPT)
+                .addHeader("Referer", mUrl)
+                .build();
 
-    private int checkUrl()throws IOException {
+        Response resp = client.newCall(request).execute();
+        Log.v(TAG, "checkUrl: " + mUrl);
+        Log.v(TAG, " - Code: " + resp.code());
+        Log.v(TAG, " - Head: " + resp.headers().toString());
+        Log.v(TAG, " - Body: " + resp.body().string());
+        return resp.code();
+
+        /*
         URL ConnUrl = new URL(mUrl);
         mCheckConn = (HttpURLConnection) ConnUrl.openConnection();
         mCheckConn.setRequestMethod("GET");
@@ -225,7 +395,7 @@ public class Cloudflare {
         }
         mCheckConn.setUseCaches(false);
         mCheckConn.connect();
-        return mCheckConn.getResponseCode();
+        return mCheckConn.getResponseCode();*/
     }
 
     private void closeAllConn(){
@@ -242,7 +412,7 @@ public class Cloudflare {
 
 
     public interface cfCallback{
-        void onSuccess(List<HttpCookie> cookieList);
+        void onSuccess(List<Cookie> cookieList);
         void onFail();
     }
 
@@ -320,7 +490,8 @@ public class Cloudflare {
     }
 
     private String getCfdnDOM(String str) {
-        String dom = regex(str,"k \\= \\'(.+?)\\'\\;").get(0);
+        List<String> rex = regex(str, "k \\= \\'(.+?)\\'\\;");
+        String dom = (rex != null && rex.size()>0)? rex.get(0) : "";
         if (!TextUtils.isEmpty(dom)){
             String cfdn = regex(str,"id=\""+dom+"\">(.+?)</div>").get(0);
             if (!TextUtils.isEmpty(cfdn)){

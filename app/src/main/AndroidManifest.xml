@@ -105,6 +105,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.ov3rk1ll.kinocast.ui.DetailActivity" />
         </activity>
+        <activity
+            android:name=".ui.ExoPlayerActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_player"
+            android:parentActivityName=".ui.DetailActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.ov3rk1ll.kinocast.ui.DetailActivity" />
+        </activity>
 
         <activity
             android:name=".ui.DeeplinkActivity"
@@ -140,7 +149,6 @@
                 <data android:mimeType="text/*" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.ExoPlayerActivity" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"

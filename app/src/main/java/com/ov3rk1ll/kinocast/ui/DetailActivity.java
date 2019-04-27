@@ -358,6 +358,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
     @Override
     protected void onResume() {
         super.onResume();
+        CastApp.setCurrentActivity(this);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.ov3rk1ll.kinocast;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -23,6 +24,16 @@ public class CastApp extends Application {
 
 
     private static CastApp sApplication;
+
+    public static Activity getCurrentActivity() {
+        return activity;
+    }
+
+    public static void setCurrentActivity(Activity activity) {
+        CastApp.activity = activity;
+    }
+
+    private static Activity activity;
 
     public static CastApp getApplication() {
         return sApplication;

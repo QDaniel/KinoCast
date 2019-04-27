@@ -164,6 +164,10 @@ public abstract class Parser {
     public static Document getDocument(String url, Map<String, String> cookies) throws IOException {
         Response response = getDocumentResponse(url, cookies);
         String body = response.body().string();
+        if (response.code() == 302) {
+            Log.d(TAG, body);
+            throw new IOException("Unexpected status code " + response.code() + " -> " + response.header("Location"));
+        }
         if (response.code() != 200) {
             Log.d(TAG, body);
             throw new IOException("Unexpected status code " + response.code());
