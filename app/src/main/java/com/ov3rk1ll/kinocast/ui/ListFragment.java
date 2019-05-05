@@ -178,29 +178,35 @@ public class ListFragment extends Fragment {
 
         @Override
         protected void onPostExecute(ViewModel[] viewModels) {
-            Activity activity = getActivity();
-            if(activity != null) {
+            try {
 
-                TheMovieDb tmdbCache = new TheMovieDb(CastApp.GetCheckedContext(activity));
 
-                if (viewModels != null) {
-                    for (ViewModel m : viewModels) {
-                        Boolean add = true;
-                        m.getParser(activity).updateFromCache(tmdbCache, m);
-                        if (add) adapter.add(m, adapter.getItemCount());
+                Activity activity = getActivity();
+                if (activity != null) {
+
+                    TheMovieDb tmdbCache = new TheMovieDb(CastApp.GetCheckedContext(activity));
+
+                    if (viewModels != null) {
+                        for (ViewModel m : viewModels) {
+                            Boolean add = true;
+                            m.getParser(activity).updateFromCache(tmdbCache, m);
+                            if (add) adapter.add(m, adapter.getItemCount());
+                        }
+                    } else {
+                        getException().printStackTrace();
+                        FlurryAgent.onError(getString(R.string.connection_error_title), getString(R.string.connection_error_message, Parser.getInstance().getUrl()), getException());
+                        activity.findViewById(R.id.list).setVisibility(View.GONE);
+                        ((TextView) activity.findViewById(R.id.text_error)).setText(
+                                getString(R.string.connection_error_title) + "\n" +
+                                        getString(R.string.connection_error_message, Parser.getInstance().getUrl()) +
+                                        "\n" + getException().getMessage()
+                        );
+                        activity.findViewById(R.id.layout_error).setVisibility(View.VISIBLE);
                     }
-                } else {
-                    getException().printStackTrace();
-                    FlurryAgent.onError(getString(R.string.connection_error_title), getString(R.string.connection_error_message, Parser.getInstance().getUrl()), getException());
-                    activity.findViewById(R.id.list).setVisibility(View.GONE);
-                    ((TextView) activity.findViewById(R.id.text_error)).setText(
-                            getString(R.string.connection_error_title) + "\n" +
-                                    getString(R.string.connection_error_message, Parser.getInstance().getUrl()) +
-                                    "\n" + getException().getMessage()
-                    );
-                    activity.findViewById(R.id.layout_error).setVisibility(View.VISIBLE);
+                    ((AppCompatActivity) activity).setSupportProgressBarIndeterminateVisibility(false);
                 }
-                ((AppCompatActivity) activity).setSupportProgressBarIndeterminateVisibility(false);
+            } catch(Exception e) {
+                FlurryAgent.onError("",e.getMessage(), e);
             }
             super.onPostExecute(viewModels);
         }

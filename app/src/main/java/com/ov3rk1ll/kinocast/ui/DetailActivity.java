@@ -234,7 +234,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                 .listener(new RequestListener<ViewModelGlideRequest, GlideDrawable>() {
                     @Override
                     public boolean onException(Exception e, ViewModelGlideRequest model, Target<GlideDrawable> target, boolean isFirstResource) {
-                        e.printStackTrace();
+                        if(e != null) e.printStackTrace();
                         return false;
                     }
 
@@ -714,7 +714,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                 apps.add(new AppAdapter.App(
                         getString(R.string.player_internal_list_entry),
                         getResources().getDrawable(R.drawable.ic_player),
-                        new ComponentName(DetailActivity.this, PlayerActivity.class)
+                        new ComponentName(DetailActivity.this, ExoPlayerActivity.class)
                 ));
                 for (ResolveInfo resolveInfo : launchables) {
                     ActivityInfo activity = resolveInfo.activityInfo;

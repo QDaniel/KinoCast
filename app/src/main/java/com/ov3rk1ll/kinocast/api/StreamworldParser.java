@@ -95,7 +95,7 @@ public class StreamworldParser extends Parser {
     }
 
     @Override
-    public List<ViewModel> parseList(String url) throws IOException {
+    public List<ViewModel> parseList(String url) throws Exception {
         Log.i("Parser", "parseList: " + url);
         Document doc = getDocument(url);
         return parseList(doc);
@@ -201,7 +201,7 @@ public class StreamworldParser extends Parser {
             Document doc = super.getDocument(URL_BASE + "film/" + item.getSlug() + ".html");
 
             return parseDetail(doc, item);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return item;
@@ -219,7 +219,7 @@ public class StreamworldParser extends Parser {
 
             return model;
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -270,7 +270,7 @@ public class StreamworldParser extends Parser {
             }
 
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

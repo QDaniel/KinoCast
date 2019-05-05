@@ -66,7 +66,7 @@ public class TVDEParser extends CachedParser {
     }
 
     @Override
-    public List<ViewModel> parseList(String url) throws IOException {
+    public List<ViewModel> parseList(String url) throws Exception {
         Log.i(TAG, "parseList: " + url);
         List<ViewModel> list = super.parseList(url);
         if(list != null) return list;
@@ -114,7 +114,7 @@ public class TVDEParser extends CachedParser {
 
                 item.setMirrors(hostlist.toArray(new Host[hostlist.size()]));
 
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 

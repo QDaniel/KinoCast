@@ -31,7 +31,7 @@ public class DeeplinkParser extends CachedParser {
 
 
     @Override
-    public List<ViewModel> parseList(String url) throws IOException {
+    public List<ViewModel> parseList(String url) throws Exception {
         List<ViewModel> list = super.parseList(url);
         if(list != null) return list;
         return lastModels;

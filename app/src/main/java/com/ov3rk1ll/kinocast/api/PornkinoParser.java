@@ -50,7 +50,7 @@ public class PornkinoParser extends Parser {
     }
 
     @Override
-    public List<ViewModel> parseList(String url) throws IOException {
+    public List<ViewModel> parseList(String url) throws Exception {
         Log.i(TAG, "parseList: " + url);
         Document doc = getDocument(url);
         return parseList(doc);
@@ -158,7 +158,7 @@ public class PornkinoParser extends Parser {
             Document doc = super.getDocument(buildUrl(item.getSlug()));
 
             return parseDetail(doc, item, showui);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return item;
@@ -176,7 +176,7 @@ public class PornkinoParser extends Parser {
 
             return model;
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;

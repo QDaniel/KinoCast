@@ -104,7 +104,7 @@ public class BurningSeriesParser extends CachedParser {
     }
 
     @Override
-    public List<ViewModel> parseList(String url) throws IOException {
+    public List<ViewModel> parseList(String url) throws Exception {
         List<ViewModel> list = super.parseList(url);
         if(list != null) return list;
 
@@ -186,7 +186,7 @@ public class BurningSeriesParser extends CachedParser {
                                 Log.e(TAG, "Error parsing " + link.html(), e);
                             }
                         }
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -209,7 +209,7 @@ public class BurningSeriesParser extends CachedParser {
                 Document doc = super.getDocument(getPageLink(item));
                 return parseDetail(doc, item, showui);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return item;
@@ -227,7 +227,7 @@ public class BurningSeriesParser extends CachedParser {
 
             return model;
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -253,7 +253,7 @@ public class BurningSeriesParser extends CachedParser {
                     hostlist.add(host);
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return hostlist;
@@ -284,7 +284,7 @@ public class BurningSeriesParser extends CachedParser {
             try {
                 Document doc = getDocument(url);
                 uri = buildUrl(doc.select("a.hoster-player[href*=/out/]").attr("href"));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

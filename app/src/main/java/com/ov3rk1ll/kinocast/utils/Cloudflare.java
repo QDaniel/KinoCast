@@ -116,8 +116,6 @@ public class Cloudflare {
         mCookieManager = new CookieManager();
         mCookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL); //接受所有cookies
         CookieHandler.setDefault(mCookieManager);
-        HttpURLConnection.setFollowRedirects(false);
-
         while (!canVisit){
             if (mRetry_count>MAX_COUNT){
                 break;

@@ -261,7 +261,7 @@ public class CineToParser extends Parser {
 
             return hostlist;
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;

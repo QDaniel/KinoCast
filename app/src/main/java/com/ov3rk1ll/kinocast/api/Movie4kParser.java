@@ -88,7 +88,7 @@ public class Movie4kParser extends Parser{
     }
 
     @Override
-    public List<ViewModel> parseList(String url) throws IOException {
+    public List<ViewModel> parseList(String url) throws Exception {
         Log.i("Parser", "parseList: " + url);
         Map<String, String> cookies = new HashMap<>();
         Document doc = getDocument(url);

@@ -110,7 +110,7 @@ public class HDFilmeParser extends Parser {
     }
 
     @Override
-    public List<ViewModel> parseList(String url) throws IOException {
+    public List<ViewModel> parseList(String url) throws Exception {
         Log.i("Parser", "parseList: " + url);
         Document doc = getDocument(url);
         return parseList(doc);
@@ -154,7 +154,7 @@ public class HDFilmeParser extends Parser {
             Document doc = super.getDocument(URL_BASE + item.getSlug());
 
             return parseDetail(doc, item);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return item;
@@ -170,7 +170,7 @@ public class HDFilmeParser extends Parser {
 
             model = parseDetail(doc, model);
             return model;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -201,7 +201,7 @@ public class HDFilmeParser extends Parser {
 
             return hostlist;
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;

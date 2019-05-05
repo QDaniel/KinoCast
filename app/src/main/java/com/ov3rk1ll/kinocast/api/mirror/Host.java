@@ -1,6 +1,7 @@
 package com.ov3rk1ll.kinocast.api.mirror;
 
 import android.net.Uri;
+import android.util.Base64;
 
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
 import com.ov3rk1ll.kinocast.utils.Utils;
@@ -167,6 +168,10 @@ public abstract class Host implements Serializable {
         return null;
     }
     public static Host searchByUrl(List<Host> mirrors, String url) {
+        if(url.startsWith("https://protectlink.stream/embed.php?data=aHR0")) {
+            url = new String(Base64.decode(url.substring(42), Base64.DEFAULT));
+        }
+
         for (Host h: mirrors) {
             if(url.equalsIgnoreCase(h.getUrl())) return h;
         }

@@ -49,7 +49,7 @@ public class RapidVideo extends Host {
     public Boolean canHandleUri(Uri uri) {
         return ("rapidvideo.com".equalsIgnoreCase(uri.getHost())
                 ||  "www.rapidvideo.com".equalsIgnoreCase(uri.getHost()))
-                && uri.getPath().contains("/e/");
+                && (uri.getPath().contains("/e/") || uri.getPath().contains("/v/"));
     }
     @Override
     public void handleUri(Uri uri) {

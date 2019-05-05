@@ -112,7 +112,7 @@ public class KinoxParser extends Parser{
     }
 
     @Override
-    public List<ViewModel> parseList(String url) throws IOException {
+    public List<ViewModel> parseList(String url) throws Exception {
         Log.i(TAG, "parseList: " + url);
         Map<String, String> cookies = new HashMap<>();
         cookies.put("ListMode", "cover");
@@ -182,7 +182,7 @@ public class KinoxParser extends Parser{
             Document doc = super.getDocument(URL_BASE + "Stream/" + item.getSlug() + ".html");
 
             return parseDetail(doc, item, showui);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return item;
@@ -222,7 +222,7 @@ public class KinoxParser extends Parser{
 
             return model;
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -254,7 +254,7 @@ public class KinoxParser extends Parser{
 
             return hostlist;
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -364,7 +364,7 @@ public class KinoxParser extends Parser{
 
     @Override
     public String PreSaveParserUrl(String newUrl){
-
+        if(!newUrl.contains("://"))  newUrl = "https://" + newUrl;
         return newUrl.endsWith("/") ? newUrl : newUrl + "/";
     }
 }

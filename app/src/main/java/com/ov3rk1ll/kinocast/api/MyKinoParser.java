@@ -123,7 +123,7 @@ public class MyKinoParser extends Parser {
     }
 
     @Override
-    public List<ViewModel> parseList(String url) throws IOException {
+    public List<ViewModel> parseList(String url) throws Exception {
         Log.i("Parser", "parseList: " + url);
         Map<String, String> cookies = new HashMap<>();
         Document doc = getDocument(url, cookies);
@@ -190,7 +190,7 @@ public class MyKinoParser extends Parser {
             Document doc = super.getDocument(URL_BASE + item.getSlug() + ".html");
 
             return parseDetail(doc, item);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return item;
@@ -206,7 +206,7 @@ public class MyKinoParser extends Parser {
 
             model = parseDetail(doc, model);
             return model;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -237,7 +237,7 @@ public class MyKinoParser extends Parser {
 
             return hostlist;
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;

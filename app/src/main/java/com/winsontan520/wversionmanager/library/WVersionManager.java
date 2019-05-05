@@ -400,6 +400,7 @@ public class WVersionManager {
             InputStream input = null;
             OutputStream output = null;
             HttpURLConnection connection = null;
+            HttpURLConnection.setFollowRedirects(true);
             try {
                 URL url = new URL(sUrl[0]);
                 connection = (HttpURLConnection) url.openConnection();

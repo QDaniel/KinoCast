@@ -37,7 +37,7 @@ public class HDFilme extends Host {
             data = data.substring(data.lastIndexOf("'file' : \"https:")+10);
             data = data.substring(0,data.indexOf("\""));
             return data;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;

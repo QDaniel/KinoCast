@@ -36,10 +36,15 @@ import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
 import com.ov3rk1ll.kinocast.CastApp;
 import com.ov3rk1ll.kinocast.R;
+import com.ov3rk1ll.kinocast.api.BurningSeriesParser;
+import com.ov3rk1ll.kinocast.api.CineToParser;
 import com.ov3rk1ll.kinocast.api.DeeplinkParser;
+import com.ov3rk1ll.kinocast.api.FilmpalastParser;
 import com.ov3rk1ll.kinocast.api.KinoxParser;
+import com.ov3rk1ll.kinocast.api.NetzkinoParser;
 import com.ov3rk1ll.kinocast.api.NothingParser;
 import com.ov3rk1ll.kinocast.api.Parser;
+import com.ov3rk1ll.kinocast.api.TVStreamsParser;
 import com.ov3rk1ll.kinocast.ui.helper.layout.SearchSuggestionAdapter;
 import com.ov3rk1ll.kinocast.utils.Utils;
 import com.winsontan520.wversionmanager.library.WVersionManager;
@@ -94,6 +99,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Parser p = Parser.getParser(context, key);
                 if (p != null) list.add(p);
             }
+        } else {
+            list.add(Parser.getParser(context, KinoxParser.PARSER_ID));
+            list.add(Parser.getParser(context, BurningSeriesParser.PARSER_ID));
+            list.add(Parser.getParser(context, FilmpalastParser.PARSER_ID));
+            list.add(Parser.getParser(context, CineToParser.PARSER_ID));
+            list.add(Parser.getParser(context, NetzkinoParser.PARSER_ID));
+            list.add(Parser.getParser(context, TVStreamsParser.PARSER_ID));
         }
         int key = Integer.parseInt(preferences.getString("parser", "0"));
         if(key>0){

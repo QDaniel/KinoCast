@@ -60,6 +60,7 @@ public abstract class Parser {
             BurningSeriesParser.class,
             TVStreamsParser.class,
             TVDEParser.class,
+            ItaliaFilmPwParser.class,
             PornkinoParser.class
     };
 
@@ -157,11 +158,11 @@ public abstract class Parser {
 
     }
 
-    public static Document getDocument(String url) throws IOException {
+    public static Document getDocument(String url) throws Exception {
         return getDocument(url, null);
     }
 
-    public static Document getDocument(String url, Map<String, String> cookies) throws IOException {
+    public static Document getDocument(String url, Map<String, String> cookies) throws Exception {
         Response response = getDocumentResponse(url, cookies);
         String body = response.body().string();
         if (response.code() == 302) {
@@ -195,7 +196,23 @@ public abstract class Parser {
         }
         return client.newCall(request).execute();
     }
+    public static Response getDocumentResponse(String url, Map<String, String> cookies, String referrer) throws IOException {
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
 
+        if (cookies != null) {
+            for (String key : cookies.keySet()) {
+                injectedCookieJar.addCookie(new Cookie.Builder()
+                        .domain(request.url().host())
+                        .name(key)
+                        .value(cookies.get(key))
+                        .build()
+                );
+            }
+        }
+        return client.newCall(request).execute();
+    }
 
 
     //seems to need interceptor too
@@ -263,7 +280,7 @@ public abstract class Parser {
 
     public abstract int getParserId();
 
-    public abstract List<ViewModel> parseList(String url) throws IOException;
+    public abstract List<ViewModel> parseList(String url) throws Exception;
 
     public abstract ViewModel loadDetail(ViewModel item, boolean showui);
 
