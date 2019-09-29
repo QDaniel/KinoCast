@@ -36,6 +36,8 @@ public abstract class Host implements Serializable {
             RapidVideo.class,
             VeryStream.class,
             VevIo.class,
+            GoUnlimited.class,
+            JetLoad.class,
             Direct.class
     };
 

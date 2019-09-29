@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StreamworldParser extends Parser {
     public static final int PARSER_ID =10;
-    public static final String URL_DEFAULT = "https://streamworld.cc/";
+    public static final String URL_DEFAULT = "https://streamworld.co/";
     public static final String TAG = "StreamworldParser";
 
     private static final SparseIntArray languageResMap = new SparseIntArray();

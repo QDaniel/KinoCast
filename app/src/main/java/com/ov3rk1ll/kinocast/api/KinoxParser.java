@@ -32,7 +32,7 @@ import java.util.Set;
 
 public class KinoxParser extends Parser{
     public static final int PARSER_ID = 0;
-    public static final String URL_DEFAULT = "https://kinos.to/";
+    public static final String URL_DEFAULT = "https://kinoz.to/";
     public static final String TAG = "KinoxParser";
 
     private static final SparseIntArray languageResMap = new SparseIntArray();

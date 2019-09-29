@@ -25,7 +25,7 @@ import java.util.List;
 public class HDFilmeParser extends Parser {
     public static final int PARSER_ID = 7;
     public static final String TAG = "HDFilmeParser";
-    public static final String URL_DEFAULT = "https://hdfilme.net/";
+    public static final String URL_DEFAULT = "https://hdfilme.cc/";
 
     private static final SparseIntArray languageResMap = new SparseIntArray();
     private static final SparseArray<String> languageKeyMap = new SparseArray<>();

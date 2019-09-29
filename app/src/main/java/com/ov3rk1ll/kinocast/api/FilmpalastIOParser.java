@@ -17,7 +17,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -27,10 +26,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class FilmpalastParser extends Parser {
-    public static final int PARSER_ID = 15;
-    public static final String URL_DEFAULT = "https://filmpalast.to/";
-    public static final String TAG = "FilmpalastParser";
+public class FilmpalastIOParser extends Parser {
+    public static final int PARSER_ID = 18;
+    public static final String URL_DEFAULT = "https://filmpalast.io/";
+    public static final String TAG = "FilmpalastIOParser";
 
     private static final SparseIntArray languageResMap = new SparseIntArray();
     private static final SparseArray<String> languageKeyMap = new SparseArray<>();
@@ -85,7 +84,7 @@ public class FilmpalastParser extends Parser {
 
     @Override
     public String getParserName() {
-        return "filmpalast.to";
+        return "filmpalast.io";
     }
 
     @Override
@@ -96,7 +95,7 @@ public class FilmpalastParser extends Parser {
     private List<ViewModel> parseList(Document doc){
         List<ViewModel> list = new ArrayList<>();
         Elements files = doc.select("div#content article.glowliste");
-        if(files.size() == 0) files = doc.select("div#content article.liste");
+
         for(Element element : files){
             try {
                 ViewModel model = new ViewModel();
@@ -299,22 +298,22 @@ public class FilmpalastParser extends Parser {
     @SuppressWarnings("deprecation")
     @Override
     public String getSearchPage(String query){
-        return URL_BASE + "search/title/" + URLEncoder.encode(query);
+        return URL_BASE + "?c=movie&m=filter&keyword=" + URLEncoder.encode(query);
     }
 
     @Override
     public String getCineMovies(){
-        return URL_BASE;
+        return URL_BASE + "releases/";
     }
 
     @Override
     public String getPopularMovies(){
-        return URL_BASE + "movies/top";
+        return URL_BASE + "featured/";
     }
 
     @Override
     public String getLatestMovies(){
-        return URL_BASE + "movies/new";
+        return URL_BASE + "updates/";
     }
 
     @Override
