@@ -17,7 +17,7 @@ import com.ov3rk1ll.kinocast.utils.Utils;
 
 public class GoUnlimited extends Host {
     private static final String TAG = GoUnlimited.class.getSimpleName();
-    public static final int HOST_ID = 994;
+    public static final int HOST_ID = 84;
 
 
     @Override
