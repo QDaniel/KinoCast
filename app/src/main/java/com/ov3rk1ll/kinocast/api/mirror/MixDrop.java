@@ -15,9 +15,9 @@ import com.ov3rk1ll.kinocast.ui.DetailActivity;
 import com.ov3rk1ll.kinocast.ui.MainActivity;
 import com.ov3rk1ll.kinocast.utils.Utils;
 
-public class GoUnlimited extends Host {
-    private static final String TAG = GoUnlimited.class.getSimpleName();
-    public static final int HOST_ID = 84;
+public class MixDrop extends Host {
+    private static final String TAG = MixDrop.class.getSimpleName();
+    public static final int HOST_ID = 89;
 
     @Override
     public int getId() {
@@ -26,7 +26,7 @@ public class GoUnlimited extends Host {
 
     @Override
     public String getName() {
-        return "GoUnlimited";
+        return MixDrop.class.getSimpleName();
     }
 
     @Override
@@ -41,17 +41,17 @@ public class GoUnlimited extends Host {
         queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getdatafrom, url));
 
         Log.d(TAG, "resolve " + url);
-        if(url.contains("/f/")){
-            String id = url.substring(url.indexOf("/f/") + 3);
+        if(url.contains("/e/")){
+            String id = url.substring(url.indexOf("/e/") + 3);
             if(id.contains("/")) id = id.substring(0, id.indexOf("/"));
             queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getvideoforid,id));
-            url = "https://gounlimited.to/embed-" + id + ".html";
+            url = "https://mixdrop.co/e/" + id;
         }
         else if(url.contains("/embed/")){
             String id = url.substring(url.indexOf("/embed/") + 7);
             if(id.contains("/")) id = id.substring(0, id.indexOf("/"));
             queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getvideoforid,id));
-            url = "https://gounlimited.to/embed-" + id + ".html";
+            url = "https://mixdrop.to/e/" + id;
         }
 
         String link = getLink(url);
@@ -82,13 +82,13 @@ public class GoUnlimited extends Host {
                     public void onPageFinished(WebView view, String url) {
 
                         webView.evaluateJavascript(
-                                "(function() { return document.querySelector(\"video\").getAttribute(\"src\") })();",
+                                "(function() { return MDCore.vsrc; })();",
                                 new ValueCallback<String>() {
                                     @Override
                                     public void onReceiveValue(String html) {
                                         // code here
-                                        html = html.replaceAll("^\"|\"$", "");
-                                        Log.d("HTML", html);
+                                        html = html;
+                                        Log.d("MDCore.vsrc", html);
                                         solvedUrl[0] = html;
                                         requestDone[0] = true;
                                     }
@@ -117,8 +117,8 @@ public class GoUnlimited extends Host {
 
     @Override
     public Boolean canHandleUri(Uri uri) {
-        return ("gounlimited.to".equalsIgnoreCase(uri.getHost())
-                ||  "www.gounlimited.to".equalsIgnoreCase(uri.getHost()));
+        return ("mixdrop.co".equalsIgnoreCase(uri.getHost())
+                ||  "www.mixdrop.co".equalsIgnoreCase(uri.getHost()));
     }
     @Override
     public void handleUri(Uri uri) {
