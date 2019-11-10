@@ -73,6 +73,7 @@ public class ClipWatching extends Host {
                                     @Override
                                     public void onReceiveValue(String html) {
                                         // code here
+                                        html = html.replaceAll("^\"|\"$", "");
                                         Log.d("jwplayer source", html);
                                         solvedUrl[0] = html;
                                         requestDone[0] = true;

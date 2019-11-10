@@ -87,7 +87,7 @@ public class MixDrop extends Host {
                                     @Override
                                     public void onReceiveValue(String html) {
                                         // code here
-                                        html = html;
+                                        html = html.replaceAll("^\"|\"$", "");
                                         Log.d("MDCore.vsrc", html);
                                         solvedUrl[0] = html;
                                         requestDone[0] = true;
