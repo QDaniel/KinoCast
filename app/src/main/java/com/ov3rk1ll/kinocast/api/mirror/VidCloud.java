@@ -47,7 +47,7 @@ public class VidCloud extends Host {
             html = html.substring(html.indexOf("[{\"file\":\"") + 10);
             html = html.substring(0, html.indexOf("\""));
             html = html.replace("\\/","/");
-            return html;
+            return Utils.getUrl(html);
         } catch (Exception e) {
             e.printStackTrace();
         }

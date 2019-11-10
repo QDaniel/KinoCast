@@ -15,9 +15,9 @@ import com.ov3rk1ll.kinocast.ui.DetailActivity;
 import com.ov3rk1ll.kinocast.ui.MainActivity;
 import com.ov3rk1ll.kinocast.utils.Utils;
 
-public class MixDrop extends Host {
-    private static final String TAG = MixDrop.class.getSimpleName();
-    public static final int HOST_ID = 89;
+public class ClipWatching extends Host {
+    private static final String TAG = ClipWatching.class.getSimpleName();
+    public static final int HOST_ID = 87;
 
     @Override
     public int getId() {
@@ -26,7 +26,7 @@ public class MixDrop extends Host {
 
     @Override
     public String getName() {
-        return MixDrop.class.getSimpleName();
+        return "ClipWatching.com";
     }
 
     @Override
@@ -39,20 +39,6 @@ public class MixDrop extends Host {
         if(TextUtils.isEmpty(url)) return null;
 
         queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getdatafrom, url));
-
-        Log.d(TAG, "resolve " + url);
-        if(url.contains("/e/")){
-            String id = url.substring(url.indexOf("/e/") + 3);
-            if(id.contains("/")) id = id.substring(0, id.indexOf("/"));
-            queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getvideoforid,id));
-            url = "https://mixdrop.co/e/" + id;
-        }
-        else if(url.contains("/embed/")){
-            String id = url.substring(url.indexOf("/embed/") + 7);
-            if(id.contains("/")) id = id.substring(0, id.indexOf("/"));
-            queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getvideoforid,id));
-            url = "https://mixdrop.to/e/" + id;
-        }
 
         String link = getLink(url);
 
@@ -82,13 +68,12 @@ public class MixDrop extends Host {
                     public void onPageFinished(WebView view, String url) {
 
                         webView.evaluateJavascript(
-                                "(function() { return MDCore.vsrc; })();",
+                                "(function() { return jwplayer().getPlaylistItem(0).allSources[0].file })();",
                                 new ValueCallback<String>() {
                                     @Override
                                     public void onReceiveValue(String html) {
                                         // code here
-                                        html = html;
-                                        Log.d("MDCore.vsrc", html);
+                                        Log.d("jwplayer source", html);
                                         solvedUrl[0] = html;
                                         requestDone[0] = true;
                                     }
@@ -116,8 +101,8 @@ public class MixDrop extends Host {
 
     @Override
     public Boolean canHandleUri(Uri uri) {
-        return ("mixdrop.co".equalsIgnoreCase(uri.getHost())
-                ||  "www.mixdrop.co".equalsIgnoreCase(uri.getHost()));
+        return ("clipwatching.com".equalsIgnoreCase(uri.getHost())
+                ||  "www.clipwatching.com".equalsIgnoreCase(uri.getHost()));
     }
     @Override
     public void handleUri(Uri uri) {

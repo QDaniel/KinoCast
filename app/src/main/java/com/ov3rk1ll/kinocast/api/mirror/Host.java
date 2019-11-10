@@ -40,6 +40,7 @@ public abstract class Host implements Serializable {
             MixDrop.class,
             JetLoad.class,
             OnlyStream.class,
+            ClipWatching.class,
             Direct.class
     };
 

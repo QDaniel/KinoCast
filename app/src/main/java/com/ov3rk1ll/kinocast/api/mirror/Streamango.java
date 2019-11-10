@@ -100,8 +100,7 @@ public class Streamango extends Host {
         }
 
         if(Utils.isStringEmpty(solvedUrl[0])) return null;
-        return solvedUrl[0];
-
+        return Utils.getUrl(solvedUrl[0]);
     }
     @Override
     public Boolean canHandleUri(Uri uri) {

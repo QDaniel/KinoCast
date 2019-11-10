@@ -91,8 +91,7 @@ public class VevIo extends Host {
         Log.d("URL", solvedUrl[0]);
         if(Utils.isStringEmpty(solvedUrl[0])) return null;
 
-        return solvedUrl[0];
-
+        return Utils.getUrl(solvedUrl[0]);
     }
 
     @Override
