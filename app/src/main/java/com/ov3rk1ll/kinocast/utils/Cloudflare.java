@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.eclipsesource.v8.V8;
@@ -16,9 +17,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Array;
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -38,8 +41,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import okhttp3.Cookie;
+import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 import static android.media.CamcorderProfile.get;
@@ -228,35 +233,72 @@ public class Cloudflare {
      * 获取值并跳转获得cookies
      * @param str
      */
-    private void getCheckAnswer(String str) throws InterruptedException, IOException {
-        String s = regex(str,"name=\"s\" value=\"(.+?)\"").get(0);   //正则取值
-        String jschl_vc = regex(str,"name=\"jschl_vc\" value=\"(.+?)\"").get(0);
-        String pass = regex(str,"name=\"pass\" value=\"(.+?)\"").get(0);            //
-        double jschl_answer = get_answer(str);
-        e(String.valueOf(jschl_answer));
-        Thread.sleep(3000);
+    private void getCheckAnswer(String str) throws InterruptedException, IOException,RuntimeException {
+        AnswerBean bean = new AnswerBean();
         Uri uri = Uri.parse(mUrl);
-        String req = "https://" + uri.getHost() + "/cdn-cgi/l/chk_jschl?";
-        if (!TextUtils.isEmpty(s)){
-            s = Uri.encode(s);
-            req+="s="+s+"&";
+        if (str.contains("POST")){
+            bean.setMethod(AnswerBean.POST);
+
+            ArrayList<String> param = (ArrayList<String>) regex(str,"<form id=\"challenge-form\" action=\"(.+?)\"");
+            if (param == null || param.size() == 0){
+                e("getPost param error");
+                throw new RuntimeException("getPost param error");
+            }
+            bean.setHost("https://"+uri.getHost()+param.get(0));
+            ArrayList<String> s = (ArrayList<String>) regex(str,"<input type=\"hidden\" name=\"(.+?)\" value=\"(.+?)\">");
+            if (s != null && s.size() > 0){
+                bean.getFromData().put(s.get(0),s.get(1).contains("input type=\"hidden\"") ? "" : s.get(1));
+            }
+            String jschl_vc = regex(str,"name=\"jschl_vc\" value=\"(.+?)\"").get(0);
+            String pass = regex(str,"name=\"pass\" value=\"(.+?)\"").get(0);
+            bean.getFromData().put("jschl_vc",jschl_vc);
+            bean.getFromData().put("pass",pass);
+            double jschl_answer = get_answer(str);
+            e(String.valueOf(jschl_answer));
+            Thread.sleep(3000);
+            bean.getFromData().put("jschl_answer",String.valueOf(jschl_answer));
+        }else {
+            bean.setMethod(AnswerBean.GET);
+
+            String s = regex(str,"name=\"s\" value=\"(.+?)\"").get(0);   //正则取值
+            String jschl_vc = regex(str,"name=\"jschl_vc\" value=\"(.+?)\"").get(0);
+            String pass = regex(str,"name=\"pass\" value=\"(.+?)\"").get(0);            //
+            double jschl_answer = get_answer(str);
+            e(String.valueOf(jschl_answer));
+            Thread.sleep(3000);
+            String req = "https://" + uri.getHost() +"/cdn-cgi/l/chk_jschl?";
+            if (!TextUtils.isEmpty(s)){
+                s = Uri.encode(s);
+                req+="s="+s+"&";
+            }
+            req+="jschl_vc="+Uri.encode(jschl_vc)+"&pass="+Uri.encode(pass)+"&jschl_answer="+jschl_answer;
+            bean.setHost(req);
         }
-        req+="jschl_vc="+Uri.encode(jschl_vc)+"&pass="+Uri.encode(pass)+"&jschl_answer="+jschl_answer;
-        e("RedirectUrl",req);
-        getRedirectResponse(req);
+        e("RedirectUrl",bean.getHost());
+        getRedirectResponse(bean);
     }
 
-    private void getRedirectResponse(String url) throws IOException {
-        Request request = new Request.Builder()
-                .url(url)
+    private void getRedirectResponse(AnswerBean answerBean) throws IOException {
+        String url = answerBean.getHost();
+        Request.Builder reqbuild = new Request.Builder()
+                .url(answerBean.getHost())
                 .addHeader("User-Agent", mUser_agent)
                 .addHeader("Accept", ACCEPT)
-                .addHeader("Referer", mUrl)
-                .build();
+                .addHeader("Referer", mUrl);
+
+        if(answerBean.getMethod() == AnswerBean.POST)
+        {
+            FormBody.Builder bodybuilder = new FormBody.Builder();
+            for(Map.Entry<String, String> entry :answerBean.getFromData().entrySet()){
+                bodybuilder.add(entry.getKey(), entry.getValue());
+            }
+            reqbuild.post(bodybuilder.build());
+        }
+        Request request = reqbuild.build();
 
         Response resp = client.newCall(request).execute();
         String str = resp.body().string();
-        Log.v(TAG, "getRedirectResponse: " + url);
+        Log.v(TAG, "getRedirectResponse: " + answerBean.getHost());
         Log.v(TAG, " - Code: " + resp.code());
         Log.v(TAG, " - Head: " + resp.headers().toString());
         Log.v(TAG, " - Body: " + str);
@@ -320,7 +362,7 @@ public class Cloudflare {
 
                     Log.e(TAG, " Recatcha Token: " +  solvedUrl[0]);
                     Uri uri = Uri.parse(url);
-                    getRedirectResponse("https://" + uri.getHost() + "/cdn-cgi/l/chk_captcha?s=" + skey + "&t=" + solvedUrl[0]);
+                    //getRedirectResponse("https://" + uri.getHost() + "/cdn-cgi/l/chk_captcha?s=" + skey + "&t=" + solvedUrl[0]);
                 }
 
 
@@ -577,4 +619,37 @@ public class Cloudflare {
         Log.e("cloudflare",content);
     }
 
+    class AnswerBean{
+
+        private String host;
+        private int method;
+        private Map<String,String> fromData = new ArrayMap<>();
+        private static final int POST = 0x01;
+        private static final int GET = 0x02;
+
+
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public int getMethod() {
+            return method;
+        }
+
+        public void setMethod(int method) {
+            this.method = method;
+        }
+
+        public Map<String, String> getFromData() {
+            return fromData;
+        }
+
+        public void setFromData(Map<String, String> fromData) {
+            this.fromData = fromData;
+        }
+    }
 }
