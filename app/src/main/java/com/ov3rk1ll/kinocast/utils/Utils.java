@@ -13,6 +13,7 @@ import com.google.android.gms.cast.framework.CastContext;
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.api.Parser;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Connection;
@@ -20,9 +21,14 @@ import org.jsoup.Jsoup;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import okhttp3.CipherSuite;
 import okhttp3.ConnectionSpec;
@@ -241,8 +247,51 @@ public class Utils {
     public static CastContext getCastContext(Context context) {
         try {
             return CastContext.getSharedInstance(context);
-        } catch (Exception ex) {}
-        return  null;
+        } catch (Exception ex) {
+        }
+        return null;
+    }
+
+
+    public static ArrayList<String> unPackAll(String html) {
+        ArrayList<String> ret = new ArrayList<String>();
+        int si = 0;
+        int start = 0;
+
+        html = html.replace("\n", "").replace("\r", "");
+        Log.d("HTML", html);
+        do {
+            si = start;
+            start = html.indexOf(">eval(function(p,a,c,k,e,d)", si);
+            Log.d("Start", "" + start);
+            int end = html.indexOf(")</script>", start);
+            Log.d("end", "" + end);
+            if (start > si && end > start) {
+                String javascript = html.substring(start + 6, end);
+                Log.d("SCRIPT FOUND", javascript);
+                ret.add(unPack(javascript));
+            }
+
+        } while (start > si);
+        return ret;
+    }
+
+    public static String unPack(String javascript) {
+        ScriptEngineManager factory = new ScriptEngineManager();
+        ScriptEngine engine = factory.getEngineByName("rhino");
+        Object eval = null;
+        try {
+            eval = engine.eval("JSON.stringify(" + javascript + ")");
+        } catch (ScriptException e) {
+            // TODO Auto-generated catch block
+            Log.e("Utils", "unPack: Exception evaluating javascript " + javascript, e);
+        }
+        String ret = eval.toString().replace("\\\"", "\"");
+        ret = ret.substring(1, ret.length() - 2);
+        Log.d("Utils", ret);
+        return ret;
+    }
+
     }
 }
 

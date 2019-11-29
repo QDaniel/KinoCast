@@ -17,6 +17,9 @@ import com.ov3rk1ll.kinocast.utils.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.nodes.Document;
+
+import java.io.IOException;
 
 public class JetLoad extends Host {
     private static final String TAG = JetLoad.class.getSimpleName();
@@ -47,8 +50,12 @@ public class JetLoad extends Host {
 
         Uri uri = Uri.parse(url);
         String id = uri.getFragment();
-        Integer lpos = id.lastIndexOf("/v/");
-        if(lpos <= 0) return null;
+        if(Utils.isStringEmpty(id)) id = uri.getPath();
+
+        Integer lpos = id.lastIndexOf("/p/");
+        if(lpos < 0)  lpos = id.lastIndexOf("/v/");
+        if(lpos < 0)  lpos = id.lastIndexOf("/e/");
+        if(lpos < 0) return null;
         String key = id.substring(lpos + 3);
         Integer npos = key.indexOf("/");
         if(npos > 0) key = key.substring(0, npos);
@@ -64,13 +71,11 @@ public class JetLoad extends Host {
     }
 
     private String getLink(final String key) {
-        JSONObject jobj = Utils.readJson("https://jetload.net/api/get_direct_video/" + key);
         try {
-            //String type = jobj.getString("type");
-            String fname = jobj.getJSONObject("file").getString("file_name");
-            String hname = jobj.getJSONObject("server").getString("hostname");
-            return hname + "/v2/schema/" + fname + "/med.m3u8";
-        } catch (JSONException e) {
+            Document doc = Utils.buildJsoup("https://jetload.net/e/" + key).get();
+            return doc.select("video#player").attr("src");
+
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
