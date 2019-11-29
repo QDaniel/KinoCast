@@ -38,6 +38,7 @@ import okhttp3.Cookie;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 import static com.ov3rk1ll.kinocast.utils.Utils.enableTls12OnPreLollipop;
 
@@ -215,23 +216,7 @@ public abstract class Parser {
     }
 
 
-    //seems to need interceptor too
     public String getBody(String url) {
-
-        /*
-        Request request = new Request.Builder().url(url).build();
-        try {
-            Response response = client.newCall(request).execute();
-            for(String key : response.headers().names()){
-                Log.i(TAG, key + "=" + response.header(key));
-            }
-            return response.body().string();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-        return null;
-        */
-
         OkHttpClient noFollowClient = enableTls12OnPreLollipop(client.newBuilder().followRedirects(false)).build();
         Request request = new Request.Builder().url(url).build();
         Log.i(TAG, "read text from " + url + ", cookies=" + noFollowClient.cookieJar().toString());
@@ -241,19 +226,34 @@ public abstract class Parser {
             for (String key : response.headers().names()) {
                 Log.i(TAG, key + "=" + response.header(key));
             }
-            String body = response.body().string();
-            Log.d(TAG, body);
-
-            return body;
+            ResponseBody body = response.body();
+            return body.string();
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
+    }
 
+    public byte[] getBodyBytes(String url) {
+        OkHttpClient noFollowClient = enableTls12OnPreLollipop(client.newBuilder().followRedirects(false)).build();
+        Request request = new Request.Builder().url(url).build();
+        Log.i(TAG, "read text from " + url + ", cookies=" + noFollowClient.cookieJar().toString());
+        try {
+            Response response = noFollowClient.newCall(request).execute();
+            Log.i(TAG, "Got " + response.code() + " for " + url + ", cookies=" + noFollowClient.cookieJar().toString());
+            for (String key : response.headers().names()) {
+                Log.i(TAG, key + "=" + response.header(key));
+            }
+            ResponseBody body = response.body();
+            return body.bytes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 
-    JSONObject getJson(String url) {
+    public JSONObject getJson(String url) {
         Request request = new Request.Builder().url(url).build();
 
         Log.i("Utils", "read json from " + url);

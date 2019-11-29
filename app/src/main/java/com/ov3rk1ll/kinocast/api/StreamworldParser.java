@@ -1,9 +1,18 @@
 package com.ov3rk1ll.kinocast.api;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.mirror.Host;
@@ -284,6 +293,8 @@ public class StreamworldParser extends Parser {
         if("vidoza.net".equalsIgnoreCase(name)) return new Vidoza();
         if("rapidvideo.com".equalsIgnoreCase(name)) return new RapidVideo();
         if("openload.co".equalsIgnoreCase(name)) return new Openload();
+        Host h = Host.selectByUri(Uri.parse("https://" + name));
+        if(h!=null) return Host.selectById(h.getId());
         return null;
     }
 
@@ -301,47 +312,104 @@ public class StreamworldParser extends Parser {
 
         try {
             Document doc = super.getDocument(url);
-
-            Elements cap = doc.select("button.g-recaptcha");
-
-            Recaptcha rc = new Recaptcha(url, cap.attr("data-sitekey"), "", true);
-            queryTask.getDialog().dismiss();
+            Elements cap = doc.select(".g-recaptcha");
 
             final AtomicBoolean done = new AtomicBoolean(false);
-            try{
-                rc.handle(DetailActivity.activity, new Recaptcha.RecaptchaListener() {
-                    @Override
-                    public void onHashFound(String hash) {
-                        solvedUrl[0] = hash;
-                        done.set(true);
-                    }
+            String sitekey = cap.attr("data-sitekey");
+            final HashMap<String, String> data = new HashMap<>();
 
-                    @Override
-                    public void onError(Exception ex)
-                    {
-                        done.set(true);
-                    }
+            if(Utils.isStringEmpty(sitekey)) {
+                cap = doc.select("td form input");
+                for (Element t: cap) {
+                    String name = t.attr("name");
+                    String val = t.val();
+                    if(!Utils.isStringEmpty(val)) data.put(name, val);
+                }
 
+                Uri uri = Uri.parse("https://streamworld.co/blockscript/detector.php?blockscript=sci")
+                        .buildUpon()
+                        .appendQueryParameter("x", data.get("x"))
+                        .build();
+
+                byte[] b = getBodyBytes(uri.toString());
+                final Bitmap bitmap = BitmapFactory.decodeByteArray(b,0, b.length);
+
+                queryTask.getDialog().dismiss();
+          //          rc.handle(DetailActivity.activity, new Recaptcha.RecaptchaListener() {
+
+
+                DetailActivity.activity.runOnUiThread(new Runnable() {
+                    @SuppressLint("SetJavaScriptEnabled")
                     @Override
-                    public void onCancel()
-                    {
-                        done.set(true);
+                    public void run() {
+                        LinearLayout layout = new LinearLayout(DetailActivity.activity);
+                        layout.setOrientation(LinearLayout.VERTICAL);
+
+                        final ImageView image = new ImageView(DetailActivity.activity);
+                        image.setImageBitmap(bitmap);
+                        layout.addView(image);
+
+                        final EditText codeBox = new EditText(DetailActivity.activity);
+                        codeBox.setHint("Code");
+                        layout.addView(codeBox); // Another add method
+
+                        AlertDialog.Builder builder =
+                        new AlertDialog.Builder(DetailActivity.activity).
+                                setMessage("Please resolve the Captcha").
+                                setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                        data.put("val", codeBox.getText().toString());
+                                        done.set(true);
+                                    }
+                                }).
+                                setView(layout);
+                        builder.create().show();
                     }
                 });
-            }
-            catch (Exception e ) {
-                e.printStackTrace();
-            }
-            synchronized (done) {
-                while (done.get() == false) {
-                    done.wait(1000); // wait here until the listener fires
+                synchronized (done) {
+                    while (done.get() == false) {
+                        done.wait(1000); // wait here until the listener fires
+                    }
                 }
+                String ret = Utils.getRedirectTarget(url, data.entrySet());
+                data.clear();
+
+            } else {
+
+                Recaptcha rc = new Recaptcha(url, sitekey, "", true);
+                queryTask.getDialog().dismiss();
+
+                try {
+                    rc.handle(DetailActivity.activity, new Recaptcha.RecaptchaListener() {
+                        @Override
+                        public void onHashFound(String hash) {
+                            solvedUrl[0] = hash;
+                            done.set(true);
+                        }
+
+                        @Override
+                        public void onError(Exception ex) {
+                            done.set(true);
+                        }
+
+                        @Override
+                        public void onCancel() {
+                            done.set(true);
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                synchronized (done) {
+                    while (done.get() == false) {
+                        done.wait(1000); // wait here until the listener fires
+                    }
+                }
+                data.put("g-recaptcha-response", solvedUrl[0]);
             }
-
-            HashMap<String, String> data = new HashMap<>();
-            data.put("g-recaptcha-response", solvedUrl[0]);
             return Utils.getRedirectTarget(url, data.entrySet());
-
         } catch (Exception e1) {
             e1.printStackTrace();
         }

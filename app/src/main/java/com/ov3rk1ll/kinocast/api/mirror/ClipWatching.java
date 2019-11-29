@@ -6,7 +6,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.webkit.ValueCallback;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -15,9 +15,22 @@ import com.ov3rk1ll.kinocast.ui.DetailActivity;
 import com.ov3rk1ll.kinocast.ui.MainActivity;
 import com.ov3rk1ll.kinocast.utils.Utils;
 
+import org.jsoup.nodes.Document;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+
 public class ClipWatching extends Host {
     private static final String TAG = ClipWatching.class.getSimpleName();
     public static final int HOST_ID = 87;
+
+    private static final Pattern regexMp4 = Pattern.compile("http[s]*:\\/\\/([0-9a-z.]*)\\/([0-9a-z.]*?)\\/v\\.mp4");
 
     @Override
     public int getId() {
@@ -36,7 +49,7 @@ public class ClipWatching extends Host {
 
     @Override
     public String getVideoPath(DetailActivity.QueryPlayTask queryTask) {
-        if(TextUtils.isEmpty(url)) return null;
+        if (TextUtils.isEmpty(url)) return null;
 
         queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getdatafrom, url));
 
@@ -48,65 +61,78 @@ public class ClipWatching extends Host {
         return link;
     }
 
-    private String getLink(final String url){
+    private String getLink(final String url) {
 
-        final boolean[] requestDone = {false};
-        final String[] solvedUrl = {null};
+        try {
+            Document doc = Utils.buildJsoup(url).get();
 
-        MainActivity.activity.runOnUiThread(new Runnable() {
-            @SuppressLint("SetJavaScriptEnabled")
-            @Override
-            public void run() {
-                // Virtual WebView
-                final WebView webView = MainActivity.webView;
-
-                webView.setVisibility(View.GONE);
-                webView.getSettings().setUserAgentString(Utils.USER_AGENT);
-                webView.getSettings().setJavaScriptEnabled(true);
-                webView.setWebViewClient(new WebViewClient() {
-
-                    public void onPageFinished(WebView view, String url) {
-
-                        webView.evaluateJavascript(
-                                "(function() { return jwplayer().getPlaylistItem(0).allSources[0].file })();",
-                                new ValueCallback<String>() {
-                                    @Override
-                                    public void onReceiveValue(String html) {
-                                        // code here
-                                        html = html.replaceAll("^\"|\"$", "");
-                                        Log.d("jwplayer source", html);
-                                        solvedUrl[0] = html;
-                                        requestDone[0] = true;
-                                    }
-                                });
-
-                    }
-
-                });
-                webView.loadUrl(url);
+            Matcher m = regexMp4.matcher(doc.html());
+            if (m.find()) {
+                return m.group(0);
             }
-        });
 
-        int timeout = 50;
-        // Wait for the webView to load the correct url
-        while (!requestDone[0]){
-            SystemClock.sleep(200);
-            timeout--;
-            if(timeout <= 0)
-                break;
+            ArrayList<String> list = unPackAll(doc.html());
+
+            for (String pack : list) {
+                m = regexMp4.matcher(pack);
+                if (m.find()) {
+                    return m.group(0);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        if(Utils.isStringEmpty(solvedUrl[0])) return null;
-        return Utils.getUrl(solvedUrl[0]);
+        return null;
     }
 
     @Override
     public Boolean canHandleUri(Uri uri) {
         return ("clipwatching.com".equalsIgnoreCase(uri.getHost())
-                ||  "www.clipwatching.com".equalsIgnoreCase(uri.getHost()));
+                || "www.clipwatching.com".equalsIgnoreCase(uri.getHost()));
     }
+
     @Override
     public void handleUri(Uri uri) {
         setUrl(uri.toString());
+    }
+
+    ArrayList<String> unPackAll(String html) {
+        ArrayList<String> ret = new ArrayList<String>();
+        int si = 0;
+        int start = 0;
+
+        html = html.replace("\n", "").replace("\r", "");
+        Log.d("HTML", html);
+        do {
+            si = start;
+            start = html.indexOf(">eval(function(p,a,c,k,e,d)", si);
+            Log.d("Start", "" + start);
+            int end = html.indexOf(")</script>", start);
+            Log.d("end", "" + end);
+            if (start > si && end > start) {
+                String javascript = html.substring(start + 6, end);
+                Log.d("SCRIPT FOUND", javascript);
+                ret.add(unPack(javascript));
+            }
+
+        } while (start > si);
+        return ret;
+    }
+
+    private String unPack(String javascript) {
+        ScriptEngineManager factory = new ScriptEngineManager();
+        ScriptEngine engine = factory.getEngineByName("rhino");
+        Object eval = null;
+        try {
+            eval = engine.eval("JSON.stringify(" + javascript + ")");
+        } catch (ScriptException e) {
+            // TODO Auto-generated catch block
+            Log.e(TAG, "Exception evaluating javascript " + javascript, e);
+        }
+        String ret = eval.toString().replace("\\\"", "\"");
+        ret = ret.substring(1, ret.length() - 2);
+        Log.d(TAG, ret);
+        return ret;
     }
 }
